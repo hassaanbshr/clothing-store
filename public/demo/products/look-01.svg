@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200" fill="none">
+  <rect width="900" height="1200" fill="#F2EDE7"/>
+  <rect x="86" y="68" width="728" height="1064" rx="44" fill="url(#bg)"/>
+  <ellipse cx="450" cy="280" rx="120" ry="132" fill="#F4D6C7"/>
+  <path d="M346 430c34-50 93-77 104-77s70 27 104 77l74 143c14 27-1 59-31 68l-71 21v308c0 26-21 47-47 47H421c-26 0-47-21-47-47V662l-71-21c-30-9-45-41-31-68l74-143Z" fill="#2E3138"/>
+  <path d="M450 354c-30 0-62 28-77 68l77 79 77-79c-15-40-47-68-77-68Z" fill="#4D515A"/>
+  <rect x="391" y="662" width="118" height="355" rx="26" fill="#23262C"/>
+  <rect x="246" y="560" width="110" height="78" rx="24" fill="#C49A6C"/>
+  <rect x="544" y="560" width="110" height="78" rx="24" fill="#C49A6C"/>
+  <text x="450" y="1112" text-anchor="middle" fill="#5E534B" font-family="Arial, sans-serif" font-size="42" letter-spacing="8">MARGELLE EDIT</text>
+  <defs>
+    <linearGradient id="bg" x1="450" y1="68" x2="450" y2="1132" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FCFBF9"/>
+      <stop offset="1" stop-color="#E6DDD4"/>
+    </linearGradient>
+  </defs>
+</svg>

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200" fill="none">
+  <rect width="900" height="1200" fill="#EDE7E0"/>
+  <rect x="92" y="70" width="716" height="1060" rx="40" fill="#F7F3EE"/>
+  <ellipse cx="450" cy="270" rx="116" ry="126" fill="#E9CDBA"/>
+  <path d="M314 436c38-46 83-70 136-70s98 24 136 70l56 69c19 23 14 58-11 75l-74 49-21 318c-2 28-25 50-53 50H417c-28 0-51-22-53-50l-21-318-74-49c-25-17-30-52-11-75l56-69Z" fill="#6B4A37"/>
+  <path d="M380 591h140l34 356H346l34-356Z" fill="#A97A59"/>
+  <path d="M322 451c36 28 79 42 128 42s92-14 128-42" stroke="#D8B091" stroke-width="16" stroke-linecap="round"/>
+  <text x="450" y="1094" text-anchor="middle" fill="#7E6557" font-family="Arial, sans-serif" font-size="40" letter-spacing="8">WARM NEUTRALS</text>
+</svg>

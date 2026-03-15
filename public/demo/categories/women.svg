@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1125" viewBox="0 0 900 1125" fill="none">
+  <rect width="900" height="1125" fill="#F2ECE4"/>
+  <rect x="54" y="56" width="792" height="1013" rx="42" fill="url(#a)"/>
+  <circle cx="462" cy="286" r="112" fill="#F0D4C2"/>
+  <path d="M338 424c44-51 84-74 124-74 39 0 80 23 124 74l79 93c18 22 12 55-13 70l-67 40 36 302c4 32-21 60-53 60H356c-32 0-57-28-53-60l36-302-67-40c-25-15-31-48-13-70l79-93Z" fill="#1E232A"/>
+  <path d="M340 976h245" stroke="#D6B38E" stroke-width="18" stroke-linecap="round"/>
+  <text x="450" y="1024" text-anchor="middle" fill="#FAF5EF" font-family="Arial, sans-serif" font-size="72" letter-spacing="10">WOMEN</text>
+  <defs>
+    <linearGradient id="a" x1="450" y1="56" x2="450" y2="1069" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F6F0E9"/>
+      <stop offset="1" stop-color="#DCCFC2"/>
+    </linearGradient>
+  </defs>
+</svg>

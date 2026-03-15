@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200" fill="none">
+  <rect width="900" height="1200" fill="#EDEAE4"/>
+  <rect x="76" y="76" width="748" height="1048" rx="42" fill="#FBFAF7"/>
+  <ellipse cx="450" cy="274" rx="116" ry="128" fill="#E8C7B2"/>
+  <path d="M321 422c43-44 89-68 129-68 40 0 86 24 129 68l72 74c20 21 16 54-9 70l-59 39 30 343c2 30-21 55-51 55H338c-30 0-53-25-51-55l30-343-59-39c-25-16-29-49-9-70l72-74Z" fill="#EEE6D9"/>
+  <path d="M347 1004h206l-18-279H365l-18 279Z" fill="#C8A47C"/>
+  <path d="M335 449c34 38 70 56 115 56 45 0 81-18 115-56" stroke="#C8A47C" stroke-width="18" stroke-linecap="round"/>
+  <rect x="242" y="543" width="108" height="76" rx="24" fill="#8B7E73"/>
+  <rect x="550" y="543" width="108" height="76" rx="24" fill="#8B7E73"/>
+  <text x="450" y="1100" text-anchor="middle" fill="#70655C" font-family="Arial, sans-serif" font-size="40" letter-spacing="8">SOFT TAILORING</text>
+</svg>
