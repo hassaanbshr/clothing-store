@@ -7,7 +7,7 @@ import { useCartStore } from "@/store/cart";
 import { useUIStore } from "@/store/ui";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "./theme-toggle";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
@@ -23,8 +23,13 @@ export function Navbar() {
   const { data: session, status } = useSession();
   const totalCount = useCartStore((s) => s.getTotalItems());
   const openCart = useUIStore((s) => s.openCart);
+  const [mounted, setMounted] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -58,7 +63,7 @@ export function Navbar() {
           </Button>
           <Button variant="ghost" size="icon" className="relative" onClick={openCart} aria-label="Cart">
             <ShoppingBagIcon className="h-5 w-5" />
-            {totalCount > 0 && (
+            {mounted && totalCount > 0 && (
               <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
                 {totalCount}
               </span>
