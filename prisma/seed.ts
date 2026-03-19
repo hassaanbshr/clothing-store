@@ -24,7 +24,10 @@ const products = [
       { size: "M", chest: 96, waist: 78, hip: 102, length: 114 },
       { size: "L", chest: 100, waist: 82, hip: 106, length: 116 },
     ],
-    images: ["/placeholder.svg", "/placeholder.svg"],
+    images: [
+      "https://ix4rae0uj5sw13tm.public.blob.vercel-storage.com/products/Tailored_Wool_Coat.png",
+      "https://ix4rae0uj5sw13tm.public.blob.vercel-storage.com/products/Tailored_Wool_Coat.png",
+    ],
     variants: [
       { size: "S", colorName: "Camel", colorHex: "#C7A36A", stockQuantity: 8 },
       { size: "M", colorName: "Camel", colorHex: "#C7A36A", stockQuantity: 12 },
@@ -44,7 +47,9 @@ const products = [
       { size: "S", chest: 88, waist: 72, hip: 96, length: 69 },
       { size: "M", chest: 94, waist: 78, hip: 102, length: 71 },
     ],
-    images: ["/placeholder.svg"],
+    images: [
+      "https://ix4rae0uj5sw13tm.public.blob.vercel-storage.com/products/Relaxed_Poplin_Shirt.png",
+    ],
     variants: [
       { size: "XS", colorName: "White", colorHex: "#F8F8F8", stockQuantity: 14 },
       { size: "S", colorName: "White", colorHex: "#F8F8F8", stockQuantity: 18 },
@@ -64,7 +69,9 @@ const products = [
       { size: "M", waist: 72, hip: 100, length: 106 },
       { size: "L", waist: 76, hip: 104, length: 108 },
     ],
-    images: ["/placeholder.svg"],
+    images: [
+      "https://ix4rae0uj5sw13tm.public.blob.vercel-storage.com/products/Wide-Legged_Pleated_Trousers.png",
+    ],
     variants: [
       { size: "S", colorName: "Stone", colorHex: "#D5CCBE", stockQuantity: 9 },
       { size: "M", colorName: "Stone", colorHex: "#D5CCBE", stockQuantity: 11 },
@@ -84,7 +91,9 @@ const products = [
       { size: "M", chest: 94, waist: 76, hip: 100, length: 72 },
       { size: "L", chest: 98, waist: 80, hip: 104, length: 73 },
     ],
-    images: ["/placeholder.svg"],
+    images: [
+      "https://ix4rae0uj5sw13tm.public.blob.vercel-storage.com/products/Structured_Blazer.png",
+    ],
     variants: [
       { size: "S", colorName: "Black", colorHex: "#111111", stockQuantity: 7 },
       { size: "M", colorName: "Black", colorHex: "#111111", stockQuantity: 10 },
@@ -104,7 +113,9 @@ const products = [
       { size: "L", chest: 104, waist: 92, length: 71 },
       { size: "XL", chest: 110, waist: 98, length: 73 },
     ],
-    images: ["/placeholder.svg"],
+    images: [
+      "https://ix4rae0uj5sw13tm.public.blob.vercel-storage.com/products/Heavyweight_Crewneck_Tee.png",
+    ],
     variants: [
       { size: "M", colorName: "White", colorHex: "#F5F5F5", stockQuantity: 20 },
       { size: "L", colorName: "White", colorHex: "#F5F5F5", stockQuantity: 18 },
@@ -124,7 +135,9 @@ const products = [
       { size: "M", waist: 82, hip: 102, length: 104 },
       { size: "L", waist: 88, hip: 108, length: 106 },
     ],
-    images: ["/placeholder.svg"],
+    images: [
+      "https://ix4rae0uj5sw13tm.public.blob.vercel-storage.com/products/Tepered_Chino_Pants.png",
+    ],
     variants: [
       { size: "S", colorName: "Khaki", colorHex: "#B79B73", stockQuantity: 10 },
       { size: "M", colorName: "Khaki", colorHex: "#B79B73", stockQuantity: 12 },
@@ -144,7 +157,9 @@ const products = [
       { size: "L", chest: 106, waist: 94, length: 70 },
       { size: "XL", chest: 112, waist: 100, length: 72 },
     ],
-    images: ["/placeholder.svg"],
+    images: [
+      "https://ix4rae0uj5sw13tm.public.blob.vercel-storage.com/products/Merino_Zip_Cardigan.png",
+    ],
     variants: [
       { size: "M", colorName: "Charcoal", colorHex: "#4A4A4A", stockQuantity: 9 },
       { size: "L", colorName: "Charcoal", colorHex: "#4A4A4A", stockQuantity: 11 },
@@ -160,7 +175,9 @@ const products = [
     previousPrice: 140.0,
     modelSizeInfo: null,
     sizeChartJson: null,
-    images: ["/placeholder.svg"],
+    images: [
+      "https://ix4rae0uj5sw13tm.public.blob.vercel-storage.com/products/Leather_Crossbody_Bag.png",
+    ],
     variants: [
       { size: "One Size", colorName: "Black", colorHex: "#111111", stockQuantity: 15 },
       { size: "One Size", colorName: "Brown", colorHex: "#6C4A33", stockQuantity: 9 },

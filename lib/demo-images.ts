@@ -5,6 +5,25 @@ const PRODUCT_IMAGE_POOL = [
   "/demo/products/look-04.svg",
 ] as const;
 
+const PRODUCT_IMAGE_MAP: Record<string, string> = {
+  "tailored-wool-coat":
+    "https://ix4rae0uj5sw13tm.public.blob.vercel-storage.com/products/Tailored_Wool_Coat.png",
+  "relaxed-poplin-shirt":
+    "https://ix4rae0uj5sw13tm.public.blob.vercel-storage.com/products/Relaxed_Poplin_Shirt.png",
+  "wide-leg-pleated-trousers":
+    "https://ix4rae0uj5sw13tm.public.blob.vercel-storage.com/products/Wide-Legged_Pleated_Trousers.png",
+  "structured-blazer":
+    "https://ix4rae0uj5sw13tm.public.blob.vercel-storage.com/products/Structured_Blazer.png",
+  "heavyweight-crewneck-tee":
+    "https://ix4rae0uj5sw13tm.public.blob.vercel-storage.com/products/Heavyweight_Crewneck_Tee.png",
+  "tapered-chino-pants":
+    "https://ix4rae0uj5sw13tm.public.blob.vercel-storage.com/products/Tepered_Chino_Pants.png",
+  "merino-zip-cardigan":
+    "https://ix4rae0uj5sw13tm.public.blob.vercel-storage.com/products/Merino_Zip_Cardigan.png",
+  "leather-crossbody-bag":
+    "https://ix4rae0uj5sw13tm.public.blob.vercel-storage.com/products/Leather_Crossbody_Bag.png",
+};
+
 const CATEGORY_IMAGE_MAP: Record<string, string> = {
   women: "/demo/categories/women.svg",
   men: "/demo/categories/men.svg",
@@ -42,6 +61,9 @@ export function resolveProductImage(options: {
   if (src && !isPlaceholderImage(src)) return src;
 
   const key = slugify(slug || name || "product");
+  if (PRODUCT_IMAGE_MAP[key]) {
+    return PRODUCT_IMAGE_MAP[key];
+  }
   const offset = (hash(key) + index) % PRODUCT_IMAGE_POOL.length;
   return PRODUCT_IMAGE_POOL[offset];
 }
