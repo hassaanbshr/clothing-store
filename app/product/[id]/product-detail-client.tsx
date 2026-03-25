@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { HeartIcon, RulerIcon } from "lucide-react";
+import { HeartIcon, RulerIcon, ShieldCheckIcon, SparklesIcon, TruckIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useWishlistStore } from "@/store/wishlist";
@@ -23,6 +22,7 @@ type Variant = {
   colorName: string;
   colorHex?: string | null;
   stockQuantity: number;
+  lowStockThreshold?: number;
 };
 
 type Review = {
@@ -87,9 +87,7 @@ export function ProductDetailClient({
   const selectedVariant = product.variants.find(
     (v) => v.size === (selectedSize ?? firstSize) && v.colorName === (selectedColor ?? firstColor)
   ) ?? product.variants[0];
-  const currentImages = selectedVariant
-    ? product.images
-    : product.images;
+  const currentImages = product.images;
   const mainImage = currentImages[mainImageIndex] ?? currentImages[0];
   const mainImageSrc = resolveProductImage({
     src: mainImage?.url,
@@ -102,6 +100,48 @@ export function ProductDetailClient({
     product.reviews.length > 0
       ? product.reviews.reduce((a, r) => a + r.rating, 0) / product.reviews.length
       : null;
+  const totalStock = product.variants.reduce((sum, variant) => sum + variant.stockQuantity, 0);
+  const stockThreshold = selectedVariant?.lowStockThreshold ?? 5;
+  const stockMessage =
+    !selectedVariant || selectedVariant.stockQuantity < 1
+      ? "Out of stock"
+      : selectedVariant.stockQuantity <= stockThreshold
+        ? `Only ${selectedVariant.stockQuantity} left`
+        : "In stock and ready to ship";
+  const fitNote = product.modelSizeInfo ?? "Relaxed everyday fit with room to layer comfortably.";
+  const productNotes = [
+    {
+      title: "Fabric & feel",
+      body:
+        product.description ??
+        "Soft-touch materials and clean construction designed for everyday comfort and repeat wear.",
+    },
+    {
+      title: "Fit notes",
+      body: fitNote,
+    },
+    {
+      title: "Best for",
+      body: `Daily rotation, weekend styling, and elevated ${product.category.name.toLowerCase()} wardrobes.`,
+    },
+  ];
+  const reviewHighlights = [
+    {
+      label: "Customer rating",
+      value: avgRating != null ? `${avgRating.toFixed(1)} / 5` : "New drop",
+      helper: avgRating != null ? `${product.reviews.length} verified reviews` : "Be the first to review it",
+    },
+    {
+      label: "Delivery",
+      value: "2-4 days",
+      helper: "Express dispatch on in-stock sizes",
+    },
+    {
+      label: "Purchase confidence",
+      value: "COD ready",
+      helper: "Cash on Delivery Available",
+    },
+  ];
 
   const handleAddToCart = () => {
     if (!selectedVariant || selectedVariant.stockQuantity < 1) return;
@@ -109,26 +149,34 @@ export function ProductDetailClient({
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+    <div className="container mx-auto px-4 py-8 pb-28 lg:pb-8">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-14">
         <div className="space-y-4">
-          <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-muted">
+          <div className="group relative aspect-[3/4] overflow-hidden rounded-[1.75rem] bg-muted">
             <Image
               src={mainImageSrc}
               alt={product.name}
               fill
-              className="object-cover"
+              className="object-cover transition-transform duration-500 group-hover:scale-110"
               priority
               unoptimized={mainImageSrc.startsWith("/placeholder") || mainImageSrc.startsWith("/demo/")}
             />
             {onSale && (
-              <Badge variant="sale" className="absolute top-2 left-2">
+              <Badge variant="sale" className="absolute top-3 left-3 rounded-full px-3 py-1 text-[11px] uppercase tracking-[0.18em]">
                 Sale
               </Badge>
             )}
+            {totalStock <= 12 && totalStock > 0 && (
+              <Badge className="absolute top-3 right-3 rounded-full bg-amber-500 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-black">
+                Selling Fast
+              </Badge>
+            )}
+            <div className="pointer-events-none absolute bottom-3 left-3 hidden rounded-full border border-white/20 bg-black/50 px-3 py-1 text-xs text-white backdrop-blur md:inline-flex">
+              Hover to zoom
+            </div>
           </div>
           {product.images.length > 1 && (
-            <div className="flex gap-2 overflow-x-auto">
+            <div className="flex gap-2 overflow-x-auto pb-1">
               {product.images.map((img, i) => (
                 (() => {
                   const thumbSrc = resolveProductImage({
@@ -142,8 +190,8 @@ export function ProductDetailClient({
                   key={img.id}
                   type="button"
                   className={cn(
-                    "relative h-20 w-20 shrink-0 overflow-hidden rounded-md border-2",
-                    i === mainImageIndex ? "border-primary" : "border-transparent"
+                    "relative h-24 w-20 shrink-0 overflow-hidden rounded-2xl border-2 bg-muted transition",
+                    i === mainImageIndex ? "border-primary shadow-sm" : "border-transparent hover:border-border"
                   )}
                   onClick={() => setMainImageIndex(i)}
                 >
@@ -162,24 +210,53 @@ export function ProductDetailClient({
           )}
         </div>
 
-        <div>
-          <h1 className="font-heading text-3xl font-semibold tracking-tight">
-            {product.name}
-          </h1>
-          <p className="text-muted-foreground mt-1">{product.category.name}</p>
-          <div className="flex items-center gap-2 mt-4">
-            {onSale && (
-              <span className="text-muted-foreground line-through">
-                ${product.previousPrice!.toFixed(2)}
-              </span>
-            )}
-            <span className="text-xl font-semibold">${product.price.toFixed(2)}</span>
+        <div className="space-y-6">
+          <div className="space-y-4">
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="outline" className="rounded-full px-3 py-1 uppercase tracking-[0.18em]">
+                {product.category.name}
+              </Badge>
+              {product.reviews.length > 0 && (
+                <Badge className="rounded-full bg-black px-3 py-1 uppercase tracking-[0.18em] text-white">
+                  Best Seller
+                </Badge>
+              )}
+            </div>
+
+            <div>
+              <h1 className="font-heading text-3xl font-semibold tracking-tight lg:text-4xl">
+                {product.name}
+              </h1>
+              <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
+                Elevated essentials built for modern wardrobes with everyday comfort, clean silhouettes, and easy layering.
+              </p>
+            </div>
+
+            <div className="flex items-end gap-3">
+              <span className="text-3xl font-semibold">${product.price.toFixed(2)}</span>
+              {onSale && (
+                <span className="pb-1 text-base text-muted-foreground line-through">
+                  ${product.previousPrice!.toFixed(2)}
+                </span>
+              )}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+              <span className="font-medium text-foreground">{stockMessage}</span>
+              {avgRating != null && <span>★ {avgRating.toFixed(1)} from {product.reviews.length} reviews</span>}
+              <span>{totalStock} units across variants</span>
+            </div>
           </div>
-          {avgRating != null && (
-            <p className="text-sm text-muted-foreground mt-1">
-              ★ {avgRating.toFixed(1)} ({product.reviews.length} reviews)
-            </p>
-          )}
+
+          <div className="grid gap-3 sm:grid-cols-3">
+            {reviewHighlights.map((item) => (
+              <div key={item.label} className="rounded-2xl border bg-muted/30 p-4">
+                <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">{item.label}</p>
+                <p className="mt-2 font-semibold">{item.value}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{item.helper}</p>
+              </div>
+            ))}
+          </div>
 
           <div className="mt-6">
             <p className="text-sm font-medium">Color</p>
@@ -240,30 +317,105 @@ export function ProductDetailClient({
             <p className="text-sm text-muted-foreground mt-2">{product.modelSizeInfo}</p>
           )}
 
-          <div className="flex gap-2 mt-8">
-            <Button
-              size="lg"
-              disabled={!selectedVariant || selectedVariant.stockQuantity < 1}
-              onClick={handleAddToCart}
-            >
-              Add to Cart
-            </Button>
-            <Button
-              variant="outline"
-              size="icon-lg"
-              onClick={() => toggleWishlist(product.id)}
-              aria-label={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
-            >
-              <HeartIcon className={cn("h-5 w-5", isInWishlist && "fill-red-500 text-red-500")} />
-            </Button>
+          <div className="rounded-[1.5rem] border bg-card p-5 shadow-sm">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-medium">Selected option</p>
+                <p className="text-sm text-muted-foreground">
+                  {(selectedColor ?? firstColor) || "Default"} / {(selectedSize ?? firstSize) || "Default size"}
+                </p>
+              </div>
+              <p className={cn("text-sm font-medium", selectedVariant?.stockQuantity ? "text-foreground" : "text-destructive")}>
+                {stockMessage}
+              </p>
+            </div>
+
+            <div className="mt-5 flex gap-2">
+              <Button
+                size="lg"
+                className="h-12 flex-1"
+                disabled={!selectedVariant || selectedVariant.stockQuantity < 1}
+                onClick={handleAddToCart}
+              >
+                Add to Cart
+              </Button>
+              <Button
+                variant="outline"
+                size="icon-lg"
+                onClick={() => toggleWishlist(product.id)}
+                aria-label={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
+              >
+                <HeartIcon className={cn("h-5 w-5", isInWishlist && "fill-red-500 text-red-500")} />
+              </Button>
+            </div>
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl border bg-muted/30 p-4">
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <ShieldCheckIcon className="h-4 w-4 text-primary" />
+                  Cash on Delivery Available
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">Pay with confidence when your order arrives.</p>
+              </div>
+              <div className="rounded-2xl border bg-muted/30 p-4">
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <TruckIcon className="h-4 w-4 text-primary" />
+                  Free Delivery over Rs. 2500
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">Fast dispatch on all in-stock sizes and colors.</p>
+              </div>
+            </div>
           </div>
 
-          {product.description && (
-            <div className="mt-8 border-t pt-8">
-              <h2 className="font-semibold mb-2">Description</h2>
-              <p className="text-muted-foreground whitespace-pre-wrap">{product.description}</p>
+          <div className="space-y-4 border-t pt-8">
+            <h2 className="font-semibold">Product notes</h2>
+            <div className="space-y-3">
+              {productNotes.map((note) => (
+                <div key={note.title} className="rounded-2xl border bg-muted/20 p-4">
+                  <h3 className="text-sm font-medium">{note.title}</h3>
+                  <p className="mt-2 text-sm text-muted-foreground whitespace-pre-wrap">{note.body}</p>
+                </div>
+              ))}
             </div>
-          )}
+          </div>
+
+          <details className="rounded-2xl border bg-card p-4">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 font-medium">
+              Size guide
+              <span className="text-sm text-muted-foreground">Tap to expand</span>
+            </summary>
+            <div className="mt-4 space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Use the size chart to compare your measurements and find the best fit for your everyday rotation.
+              </p>
+              {Array.isArray(product.sizeChartJson) && product.sizeChartJson.length > 0 ? (
+                <div className="overflow-hidden rounded-2xl border">
+                  <table className="w-full text-sm">
+                    <thead className="bg-muted/40 text-left">
+                      <tr>
+                        <th className="px-4 py-3 font-medium">Size</th>
+                        <th className="px-4 py-3 font-medium">Chest</th>
+                        <th className="px-4 py-3 font-medium">Waist</th>
+                        <th className="px-4 py-3 font-medium">Hip</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(product.sizeChartJson as { size: string; chest?: number; waist?: number; hip?: number }[]).map((row) => (
+                        <tr key={row.size} className="border-t">
+                          <td className="px-4 py-3 font-medium">{row.size}</td>
+                          <td className="px-4 py-3 text-muted-foreground">{row.chest ?? "-"}</td>
+                          <td className="px-4 py-3 text-muted-foreground">{row.waist ?? "-"}</td>
+                          <td className="px-4 py-3 text-muted-foreground">{row.hip ?? "-"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">Use the “Find my size” tool for a quick recommendation.</p>
+              )}
+            </div>
+          </details>
 
           <div className="mt-8 border-t pt-8">
             <h2 className="font-semibold mb-4">Reviews</h2>
@@ -302,6 +454,24 @@ export function ProductDetailClient({
         onOpenChange={setSizeToolOpen}
         sizeChart={product.sizeChartJson as { size: string; chest?: number; waist?: number; hip?: number }[] | null}
       />
+
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 p-3 backdrop-blur lg:hidden">
+        <div className="mx-auto flex max-w-2xl items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-lg font-semibold">${product.price.toFixed(2)}</p>
+            <p className="truncate text-xs text-muted-foreground">
+              {(selectedColor ?? firstColor) || "Default"} / {(selectedSize ?? firstSize) || "Select size"}
+            </p>
+          </div>
+          <Button
+            className="h-11 min-w-[150px]"
+            disabled={!selectedVariant || selectedVariant.stockQuantity < 1}
+            onClick={handleAddToCart}
+          >
+            {!selectedVariant || selectedVariant.stockQuantity < 1 ? "Unavailable" : "Add to Cart"}
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { CartDrawer } from "@/components/cart/cart-drawer";
 import { QuickViewModal } from "@/components/product/quick-view-modal";
+import { NewsletterPopup } from "@/components/home/newsletter-popup";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -53,6 +54,7 @@ export default function RootLayout({
             </div>
             <CartDrawer />
             <QuickViewModal />
+            <NewsletterPopup />
           </ThemeProvider>
         </SessionProvider>
       </body>

@@ -22,6 +22,7 @@ async function getProducts() {
       include: {
         images: { orderBy: { sortOrder: "asc" }, take: 3 },
         variants: true,
+        _count: { select: { reviews: true } },
       },
       orderBy: { createdAt: "desc" },
       take: 16,
@@ -30,6 +31,33 @@ async function getProducts() {
       ...p,
       price: Number(p.price),
       previousPrice: p.previousPrice ? Number(p.previousPrice) : null,
+      createdAt: p.createdAt.toISOString(),
+      reviewCount: p._count.reviews,
+      totalStock: p.variants.reduce((sum, variant) => sum + variant.stockQuantity, 0),
+    }));
+  } catch {
+    return [];
+  }
+}
+
+async function getBestSellers() {
+  try {
+    const products = await prisma.product.findMany({
+      include: {
+        images: { orderBy: { sortOrder: "asc" }, take: 3 },
+        variants: true,
+        _count: { select: { reviews: true } },
+      },
+      orderBy: { reviews: { _count: "desc" } },
+      take: 8,
+    });
+    return products.map((p) => ({
+      ...p,
+      price: Number(p.price),
+      previousPrice: p.previousPrice ? Number(p.previousPrice) : null,
+      createdAt: p.createdAt.toISOString(),
+      reviewCount: p._count.reviews,
+      totalStock: p.variants.reduce((sum, variant) => sum + variant.stockQuantity, 0),
     }));
   } catch {
     return [];
@@ -37,14 +65,18 @@ async function getProducts() {
 }
 
 export default async function HomePage() {
-  const [categories, products] = await Promise.all([getCategories(), getProducts()]);
+  const [categories, products, bestSellers] = await Promise.all([
+    getCategories(),
+    getProducts(),
+    getBestSellers(),
+  ]);
 
   return (
     <>
       <HeroBanner />
       <FeaturedCategories categories={categories} />
       <NewArrivals products={products} />
-      <BestSellers products={products} />
+      <BestSellers products={bestSellers.length > 0 ? bestSellers : products} />
       <PromoBanner />
       <NewsletterSection />
     </>

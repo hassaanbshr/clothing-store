@@ -52,6 +52,16 @@ function SheetContent({
         {...props}
       >
         {children}
+        <SheetClose asChild>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className="absolute right-4 top-4 rounded-full"
+            aria-label="Close panel"
+          >
+            <XIcon className="h-4 w-4" />
+          </Button>
+        </SheetClose>
       </DialogPrimitive.Content>
     </SheetPortal>
   );

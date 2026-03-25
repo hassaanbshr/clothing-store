@@ -5,18 +5,52 @@ import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
+const SIZE_OPTIONS = ["S", "M", "L", "XL"] as const;
+
+function parseMultiValue(input?: string) {
+  return (input ?? "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+}
+
 async function getInitialProducts(searchParams: Record<string, string | undefined>) {
   const category = searchParams.category;
+  const query = searchParams.q?.trim();
   const sort = searchParams.sort ?? "newest";
+  const selectedSizes = parseMultiValue(searchParams.size);
+  const selectedColors = parseMultiValue(searchParams.color);
+  const maxPrice = Number(searchParams.maxPrice ?? "");
   const page = Math.max(1, parseInt(searchParams.page ?? "1", 10));
   const limit = 12;
   const skip = (page - 1) * limit;
 
-  const where: Prisma.ProductWhereInput = {};
+  const baseWhere: Prisma.ProductWhereInput = {};
   if (category) {
-    const cat = await prisma.category.findUnique({ where: { slug: category } });
-    if (cat) where.categoryId = cat.id;
+    baseWhere.category = { is: { slug: category } };
   }
+  if (query) {
+    baseWhere.OR = [
+      { name: { contains: query, mode: "insensitive" } },
+      { slug: { contains: query, mode: "insensitive" } },
+      { description: { contains: query, mode: "insensitive" } },
+      { category: { is: { name: { contains: query, mode: "insensitive" } } } },
+    ];
+  }
+
+  const variantFilter: Prisma.ProductVariantWhereInput = {};
+  if (selectedSizes.length > 0) {
+    variantFilter.size = { in: selectedSizes };
+  }
+  if (selectedColors.length > 0) {
+    variantFilter.colorName = { in: selectedColors };
+  }
+
+  const where: Prisma.ProductWhereInput = {
+    ...baseWhere,
+    ...(Object.keys(variantFilter).length > 0 ? { variants: { some: variantFilter } } : {}),
+    ...(Number.isFinite(maxPrice) && maxPrice > 0 ? { price: { lte: maxPrice } } : {}),
+  };
 
   const orderBy: Prisma.ProductOrderByWithRelationInput =
     sort === "price_asc"
@@ -27,12 +61,13 @@ async function getInitialProducts(searchParams: Record<string, string | undefine
           ? { reviews: { _count: "desc" } }
           : { createdAt: "desc" };
 
-  const [products, total, categories] = await Promise.all([
+  const [products, total, categories, colorOptions, priceMeta] = await Promise.all([
     prisma.product.findMany({
       where,
       include: {
         images: { orderBy: { sortOrder: "asc" }, take: 2 },
         variants: true,
+        _count: { select: { reviews: true } },
       },
       orderBy,
       skip,
@@ -40,12 +75,25 @@ async function getInitialProducts(searchParams: Record<string, string | undefine
     }),
     prisma.product.count({ where }),
     prisma.category.findMany({ orderBy: { order: "asc" } }),
+    prisma.productVariant.findMany({
+      where: { product: { is: baseWhere } },
+      select: { colorName: true, colorHex: true },
+      distinct: ["colorName"],
+      orderBy: { colorName: "asc" },
+    }),
+    prisma.product.aggregate({
+      where: baseWhere,
+      _max: { price: true },
+    }),
   ]);
 
   const serialized = products.map((p) => ({
     ...p,
     price: Number(p.price),
     previousPrice: p.previousPrice ? Number(p.previousPrice) : null,
+    createdAt: p.createdAt.toISOString(),
+    reviewCount: p._count.reviews,
+    totalStock: p.variants.reduce((sum, variant) => sum + variant.stockQuantity, 0),
   }));
 
   return {
@@ -54,6 +102,11 @@ async function getInitialProducts(searchParams: Record<string, string | undefine
     page,
     totalPages: Math.ceil(total / limit),
     categories,
+    filters: {
+      sizeOptions: [...SIZE_OPTIONS],
+      colorOptions,
+      maxPrice: Number(priceMeta._max.price ?? 200),
+    },
   };
 }
 

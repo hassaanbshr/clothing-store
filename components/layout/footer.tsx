@@ -1,11 +1,12 @@
 import Link from "next/link";
+import { NewsletterForm } from "@/components/shared/newsletter-form";
 
 const footerLinks = {
   shop: [
     { href: "/shop", label: "All Products" },
     { href: "/shop?category=men", label: "Men" },
     { href: "/shop?category=women", label: "Women" },
-    { href: "/shop?category=accessories", label: "Accessories" },
+    { href: "/shop?q=hoodie", label: "Hoodies" },
   ],
   company: [
     { href: "/about", label: "About" },
@@ -62,22 +63,14 @@ export function Footer() {
           <div>
             <h3 className="mb-4 text-sm font-semibold">Newsletter</h3>
             <p className="text-sm text-muted-foreground mb-2">
-              Subscribe for updates and offers.
+              Get launch updates, new arrivals, and your first-order offer.
             </p>
-            <form className="flex gap-2" action="/api/newsletter" method="post">
-              <input
-                type="email"
-                name="email"
-                placeholder="Email"
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              />
-              <button
-                type="submit"
-                className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-              >
-                Subscribe
-              </button>
-            </form>
+            <NewsletterForm
+              source="footer"
+              compact
+              buttonLabel="Join"
+              placeholder="Email"
+            />
           </div>
         </div>
         <div className="mt-12 border-t pt-8 text-center text-sm text-muted-foreground">
