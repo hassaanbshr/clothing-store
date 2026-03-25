@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useCartStore } from "@/store/cart";
@@ -9,6 +10,7 @@ import { CreditCardIcon, ShieldCheckIcon, TruckIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { OrderSummary } from "@/components/checkout/order-summary";
+import { MotionItem, MotionReveal, MotionStagger, premiumEase } from "@/components/shared/motion";
 
 const FREE_SHIPPING_THRESHOLD = 150;
 const STANDARD_SHIPPING = 12;
@@ -179,7 +181,7 @@ export default function CheckoutPage() {
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">
-      <div className="mb-8 flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+      <MotionReveal className="mb-8 flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <h1 className="font-heading text-3xl font-semibold tracking-tight">Checkout</h1>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -190,23 +192,23 @@ export default function CheckoutPage() {
           <span className="rounded-full border px-3 py-1">Free shipping over ${FREE_SHIPPING_THRESHOLD}</span>
           <span className="rounded-full border px-3 py-1">Cash on Delivery Available</span>
         </div>
-      </div>
+      </MotionReveal>
 
       <form onSubmit={handlePlaceOrder} className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
-        <div className="space-y-6">
+        <MotionStagger className="space-y-6" delayChildren={0.05}>
           {!session && (
-            <div className="rounded-[1.5rem] border border-amber-500/40 bg-amber-500/10 p-5">
+            <MotionItem className="rounded-[1.5rem] border border-amber-500/40 bg-amber-500/10 p-5 premium-panel">
               <p className="text-sm font-medium">Sign in required to place your order</p>
               <p className="mt-1 text-sm text-muted-foreground">
                 Your cart is ready. Sign in now and we will keep you on the fastest path to checkout.
               </p>
-              <Button asChild className="mt-4">
+              <Button asChild className="premium-surface mt-4">
                 <Link href="/auth/login?callbackUrl=/checkout">Sign In to Continue</Link>
               </Button>
-            </div>
+            </MotionItem>
           )}
 
-          <div className="rounded-[1.75rem] border bg-card p-5 shadow-sm">
+          <MotionItem className="rounded-[1.75rem] border bg-card p-5 shadow-sm premium-panel">
             <div className="mb-5">
               <h2 className="text-lg font-semibold">1. Shipping details</h2>
               <p className="text-sm text-muted-foreground">
@@ -253,9 +255,9 @@ export default function CheckoutPage() {
                 />
               </div>
             </div>
-          </div>
+          </MotionItem>
 
-          <div className="rounded-[1.75rem] border bg-card p-5 shadow-sm">
+          <MotionItem className="rounded-[1.75rem] border bg-card p-5 shadow-sm premium-panel">
             <div className="mb-5">
               <h2 className="text-lg font-semibold">2. Delivery & payment</h2>
               <p className="text-sm text-muted-foreground">
@@ -267,7 +269,7 @@ export default function CheckoutPage() {
               <button
                 type="button"
                 onClick={() => setPaymentMethod("COD")}
-                className="rounded-2xl border border-primary bg-primary/5 p-4 text-left"
+                className="rounded-2xl border border-primary bg-primary/5 p-4 text-left premium-surface"
               >
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <ShieldCheckIcon className="h-4 w-4 text-primary" />
@@ -276,7 +278,7 @@ export default function CheckoutPage() {
                 <p className="mt-2 text-xs text-muted-foreground">Pay when your order arrives.</p>
               </button>
 
-              <div className="rounded-2xl border bg-muted/30 p-4 text-left opacity-70">
+              <div className="rounded-2xl border bg-muted/30 p-4 text-left opacity-70 premium-surface">
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <CreditCardIcon className="h-4 w-4 text-muted-foreground" />
                   Credit / Debit Card
@@ -284,7 +286,7 @@ export default function CheckoutPage() {
                 <p className="mt-2 text-xs text-muted-foreground">Coming soon</p>
               </div>
 
-              <div className="rounded-2xl border bg-muted/30 p-4 text-left opacity-70">
+              <div className="rounded-2xl border bg-muted/30 p-4 text-left opacity-70 premium-surface">
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <TruckIcon className="h-4 w-4 text-muted-foreground" />
                   Online Payment
@@ -292,9 +294,9 @@ export default function CheckoutPage() {
                 <p className="mt-2 text-xs text-muted-foreground">Coming soon</p>
               </div>
             </div>
-          </div>
+          </MotionItem>
 
-          <div className="rounded-[1.75rem] border bg-card p-5 shadow-sm">
+          <MotionItem className="rounded-[1.75rem] border bg-card p-5 shadow-sm premium-panel">
             <div className="mb-5">
               <h2 className="text-lg font-semibold">3. Offers</h2>
               <p className="text-sm text-muted-foreground">Apply a coupon before placing your order.</p>
@@ -311,25 +313,33 @@ export default function CheckoutPage() {
                 type="button"
                 variant="outline"
                 onClick={handleApplyCoupon}
-                className="h-11"
+                className="premium-surface h-11"
                 disabled={subtotal <= 0 || summaryLoading}
               >
                 Apply
               </Button>
             </div>
             {couponMessage && (
-              <p className="mt-3 text-sm text-muted-foreground">{couponMessage}</p>
+              <motion.p
+                key={couponMessage}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.24, ease: premiumEase }}
+                className="mt-3 text-sm text-muted-foreground"
+              >
+                {couponMessage}
+              </motion.p>
             )}
-          </div>
+          </MotionItem>
 
           {errorMessage && (
-            <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+            <MotionItem className="rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
               {errorMessage}
-            </div>
+            </MotionItem>
           )}
-        </div>
+        </MotionStagger>
 
-        <div className="space-y-4">
+        <MotionStagger className="space-y-4" delayChildren={0.1}>
           <OrderSummary
             items={summaryItems}
             subtotal={subtotal}
@@ -339,16 +349,16 @@ export default function CheckoutPage() {
             loading={summaryLoading}
           />
 
-          <div className="rounded-[1.75rem] border bg-card p-5 shadow-sm">
+          <MotionItem className="rounded-[1.75rem] border bg-card p-5 shadow-sm premium-panel">
             <div className="space-y-3 text-sm text-muted-foreground">
               <p>COD confirmed at delivery. Shipping updates are shared after your order is placed.</p>
               <p>{shippingFee === 0 ? "You unlocked free shipping." : `Add $${(FREE_SHIPPING_THRESHOLD - subtotal).toFixed(2)} more for free shipping.`}</p>
             </div>
-            <Button type="submit" size="lg" disabled={loading || summaryLoading || !session} className="mt-5 h-12 w-full">
+            <Button type="submit" size="lg" disabled={loading || summaryLoading || !session} className="premium-surface mt-5 h-12 w-full">
               {loading ? "Placing order..." : session ? "Place Order" : "Sign In to Place Order"}
             </Button>
-          </div>
-        </div>
+          </MotionItem>
+        </MotionStagger>
       </form>
     </div>
   );

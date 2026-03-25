@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 const SIZE_OPTIONS = ["S", "M", "L", "XL"] as const;
+const NEW_ARRIVAL_WINDOW_MS = 1000 * 60 * 60 * 24 * 45;
 
 function parseMultiValue(input?: string) {
   return (input ?? "")
@@ -92,6 +93,7 @@ async function getInitialProducts(searchParams: Record<string, string | undefine
     price: Number(p.price),
     previousPrice: p.previousPrice ? Number(p.previousPrice) : null,
     createdAt: p.createdAt.toISOString(),
+    isNewArrival: Date.now() - p.createdAt.getTime() <= NEW_ARRIVAL_WINDOW_MS,
     reviewCount: p._count.reviews,
     totalStock: p.variants.reduce((sum, variant) => sum + variant.stockQuantity, 0),
   }));

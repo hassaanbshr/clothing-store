@@ -28,14 +28,33 @@ export function QuickViewModal() {
   } | null>(null);
 
   useEffect(() => {
-    if (!productId) {
-      setProduct(null);
-      return;
-    }
-    fetch(`/api/products/${productId}`)
-      .then((r) => (r.ok ? r.json() : null))
-      .then(setProduct)
-      .catch(() => setProduct(null));
+    let cancelled = false;
+
+    const loadProduct = async () => {
+      if (!productId) {
+        if (!cancelled) {
+          setProduct(null);
+        }
+        return;
+      }
+
+      try {
+        const nextProduct = await fetch(`/api/products/${productId}`).then((r) => (r.ok ? r.json() : null));
+        if (!cancelled) {
+          setProduct(nextProduct);
+        }
+      } catch {
+        if (!cancelled) {
+          setProduct(null);
+        }
+      }
+    };
+
+    void loadProduct();
+
+    return () => {
+      cancelled = true;
+    };
   }, [productId]);
 
   const open = !!productId;

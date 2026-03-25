@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import { HeartIcon, RulerIcon, ShieldCheckIcon, SparklesIcon, TruckIcon } from "lucide-react";
+import { HeartIcon, RulerIcon, ShieldCheckIcon, TruckIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { MotionItem, MotionReveal, MotionStagger, premiumEase } from "@/components/shared/motion";
 import { useWishlistStore } from "@/store/wishlist";
 import { useCartStore } from "@/store/cart";
 import { useUIStore } from "@/store/ui";
@@ -151,16 +153,27 @@ export function ProductDetailClient({
   return (
     <div className="container mx-auto px-4 py-8 pb-28 lg:pb-8">
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-14">
-        <div className="space-y-4">
+        <MotionReveal className="space-y-4">
           <div className="group relative aspect-[3/4] overflow-hidden rounded-[1.75rem] bg-muted">
-            <Image
-              src={mainImageSrc}
-              alt={product.name}
-              fill
-              className="object-cover transition-transform duration-500 group-hover:scale-110"
-              priority
-              unoptimized={mainImageSrc.startsWith("/placeholder") || mainImageSrc.startsWith("/demo/")}
-            />
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={mainImageSrc}
+                initial={{ opacity: 0, scale: 1.02 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.985 }}
+                transition={{ duration: 0.45, ease: premiumEase }}
+                className="absolute inset-0"
+              >
+                <Image
+                  src={mainImageSrc}
+                  alt={product.name}
+                  fill
+                  className="object-cover transition-transform duration-700 group-hover:scale-110 premium-media"
+                  priority
+                  unoptimized={mainImageSrc.startsWith("/placeholder") || mainImageSrc.startsWith("/demo/")}
+                />
+              </motion.div>
+            </AnimatePresence>
             {onSale && (
               <Badge variant="sale" className="absolute top-3 left-3 rounded-full px-3 py-1 text-[11px] uppercase tracking-[0.18em]">
                 Sale
@@ -186,11 +199,12 @@ export function ProductDetailClient({
                     index: i,
                   });
                   return (
-                <button
+                <motion.button
                   key={img.id}
                   type="button"
+                  whileTap={{ scale: 0.96 }}
                   className={cn(
-                    "relative h-24 w-20 shrink-0 overflow-hidden rounded-2xl border-2 bg-muted transition",
+                    "relative h-24 w-20 shrink-0 overflow-hidden rounded-2xl border-2 bg-muted transition premium-surface",
                     i === mainImageIndex ? "border-primary shadow-sm" : "border-transparent hover:border-border"
                   )}
                   onClick={() => setMainImageIndex(i)}
@@ -202,16 +216,16 @@ export function ProductDetailClient({
                     className="object-cover"
                     unoptimized={thumbSrc.startsWith("/placeholder") || thumbSrc.startsWith("/demo/")}
                   />
-                </button>
+                </motion.button>
                   );
                 })()
               ))}
             </div>
           )}
-        </div>
+        </MotionReveal>
 
-        <div className="space-y-6">
-          <div className="space-y-4">
+        <MotionStagger className="space-y-6" delayChildren={0.05}>
+          <MotionItem className="space-y-4">
             <div className="flex flex-wrap gap-2">
               <Badge variant="outline" className="rounded-full px-3 py-1 uppercase tracking-[0.18em]">
                 {product.category.name}
@@ -246,27 +260,28 @@ export function ProductDetailClient({
               {avgRating != null && <span>★ {avgRating.toFixed(1)} from {product.reviews.length} reviews</span>}
               <span>{totalStock} units across variants</span>
             </div>
-          </div>
+          </MotionItem>
 
-          <div className="grid gap-3 sm:grid-cols-3">
+          <MotionStagger className="grid gap-3 sm:grid-cols-3" staggerChildren={0.08}>
             {reviewHighlights.map((item) => (
-              <div key={item.label} className="rounded-2xl border bg-muted/30 p-4">
+              <MotionItem key={item.label} className="rounded-2xl border bg-muted/30 p-4 premium-surface">
                 <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">{item.label}</p>
                 <p className="mt-2 font-semibold">{item.value}</p>
                 <p className="mt-1 text-xs text-muted-foreground">{item.helper}</p>
-              </div>
+              </MotionItem>
             ))}
-          </div>
+          </MotionStagger>
 
-          <div className="mt-6">
+          <MotionItem className="mt-6">
             <p className="text-sm font-medium">Color</p>
             <div className="flex gap-2 mt-2 flex-wrap">
               {colors.map((v) => (
-                <button
+                <motion.button
                   key={v.id}
                   type="button"
+                  whileTap={{ scale: 0.94 }}
                   className={cn(
-                    "h-8 w-8 rounded-full border-2 transition",
+                    "h-8 w-8 rounded-full border-2 transition premium-surface",
                     selectedColor === v.colorName ? "border-primary ring-2 ring-primary/20" : "border-border"
                   )}
                   style={{ backgroundColor: v.colorHex ?? "#ccc" }}
@@ -275,12 +290,12 @@ export function ProductDetailClient({
                 />
               ))}
             </div>
-          </div>
+          </MotionItem>
 
-          <div className="mt-6">
+          <MotionItem className="mt-6">
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium">Size</p>
-              <Button variant="ghost" size="sm" onClick={() => setSizeChartOpen(true)}>
+              <Button variant="ghost" size="sm" className="pressable" onClick={() => setSizeChartOpen(true)}>
                 <RulerIcon className="h-4 w-4 mr-1" />
                 Size chart
               </Button>
@@ -290,12 +305,13 @@ export function ProductDetailClient({
                 const variant = product.variants.find((v) => v.size === s && v.colorName === (selectedColor ?? colors[0]?.colorName));
                 const outOfStock = !variant || variant.stockQuantity < 1;
                 return (
-                  <button
+                  <motion.button
                     key={s}
                     type="button"
                     disabled={outOfStock}
+                    whileTap={{ scale: outOfStock ? 1 : 0.97 }}
                     className={cn(
-                      "h-10 min-w-[44px] rounded-md border px-3 text-sm font-medium transition",
+                      "h-10 min-w-[44px] rounded-md border px-3 text-sm font-medium transition premium-surface",
                       selectedSize === s || (!selectedSize && s === sizes[0])
                         ? "border-primary bg-primary text-primary-foreground"
                         : "border-input hover:bg-muted",
@@ -304,20 +320,20 @@ export function ProductDetailClient({
                     onClick={() => setSelectedSize(s)}
                   >
                     {s}
-                  </button>
+                  </motion.button>
                 );
               })}
             </div>
             <Button variant="link" size="sm" className="mt-2 px-0" onClick={() => setSizeToolOpen(true)}>
               Find my size
             </Button>
-          </div>
+          </MotionItem>
 
           {product.modelSizeInfo && (
             <p className="text-sm text-muted-foreground mt-2">{product.modelSizeInfo}</p>
           )}
 
-          <div className="rounded-[1.5rem] border bg-card p-5 shadow-sm">
+          <MotionItem className="rounded-[1.5rem] border bg-card p-5 shadow-sm premium-panel">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-medium">Selected option</p>
@@ -333,7 +349,7 @@ export function ProductDetailClient({
             <div className="mt-5 flex gap-2">
               <Button
                 size="lg"
-                className="h-12 flex-1"
+                className="pressable h-12 flex-1 premium-surface"
                 disabled={!selectedVariant || selectedVariant.stockQuantity < 1}
                 onClick={handleAddToCart}
               >
@@ -342,6 +358,7 @@ export function ProductDetailClient({
               <Button
                 variant="outline"
                 size="icon-lg"
+                className="pressable premium-surface"
                 onClick={() => toggleWishlist(product.id)}
                 aria-label={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
               >
@@ -350,14 +367,14 @@ export function ProductDetailClient({
             </div>
 
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <div className="rounded-2xl border bg-muted/30 p-4">
+              <div className="rounded-2xl border bg-muted/30 p-4 premium-surface">
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <ShieldCheckIcon className="h-4 w-4 text-primary" />
                   Cash on Delivery Available
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">Pay with confidence when your order arrives.</p>
               </div>
-              <div className="rounded-2xl border bg-muted/30 p-4">
+              <div className="rounded-2xl border bg-muted/30 p-4 premium-surface">
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <TruckIcon className="h-4 w-4 text-primary" />
                   Free Delivery over Rs. 2500
@@ -365,21 +382,22 @@ export function ProductDetailClient({
                 <p className="mt-1 text-xs text-muted-foreground">Fast dispatch on all in-stock sizes and colors.</p>
               </div>
             </div>
-          </div>
+          </MotionItem>
 
-          <div className="space-y-4 border-t pt-8">
+          <MotionItem className="space-y-4 border-t pt-8">
             <h2 className="font-semibold">Product notes</h2>
             <div className="space-y-3">
               {productNotes.map((note) => (
-                <div key={note.title} className="rounded-2xl border bg-muted/20 p-4">
+                <div key={note.title} className="rounded-2xl border bg-muted/20 p-4 premium-surface">
                   <h3 className="text-sm font-medium">{note.title}</h3>
                   <p className="mt-2 text-sm text-muted-foreground whitespace-pre-wrap">{note.body}</p>
                 </div>
               ))}
             </div>
-          </div>
+          </MotionItem>
 
-          <details className="rounded-2xl border bg-card p-4">
+          <MotionItem className="rounded-2xl border bg-card p-4 premium-panel">
+            <details>
             <summary className="flex cursor-pointer list-none items-center justify-between gap-3 font-medium">
               Size guide
               <span className="text-sm text-muted-foreground">Tap to expand</span>
@@ -415,9 +433,10 @@ export function ProductDetailClient({
                 <p className="text-sm text-muted-foreground">Use the “Find my size” tool for a quick recommendation.</p>
               )}
             </div>
-          </details>
+            </details>
+          </MotionItem>
 
-          <div className="mt-8 border-t pt-8">
+          <MotionItem className="mt-8 border-t pt-8">
             <h2 className="font-semibold mb-4">Reviews</h2>
             <ReviewForm productId={product.id} />
             {product.reviews.length > 0 && (
@@ -431,8 +450,8 @@ export function ProductDetailClient({
                 ))}
               </ul>
             )}
-          </div>
-        </div>
+          </MotionItem>
+        </MotionStagger>
       </div>
 
       {related.length > 0 && (
@@ -455,7 +474,12 @@ export function ProductDetailClient({
         sizeChart={product.sizeChartJson as { size: string; chest?: number; waist?: number; hip?: number }[] | null}
       />
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 p-3 backdrop-blur lg:hidden">
+      <motion.div
+        initial={{ y: 32, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.45, ease: premiumEase, delay: 0.15 }}
+        className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 p-3 backdrop-blur lg:hidden"
+      >
         <div className="mx-auto flex max-w-2xl items-center gap-3">
           <div className="min-w-0 flex-1">
             <p className="text-lg font-semibold">${product.price.toFixed(2)}</p>
@@ -464,14 +488,14 @@ export function ProductDetailClient({
             </p>
           </div>
           <Button
-            className="h-11 min-w-[150px]"
+            className="pressable h-11 min-w-[150px] premium-surface"
             disabled={!selectedVariant || selectedVariant.stockQuantity < 1}
             onClick={handleAddToCart}
           >
             {!selectedVariant || selectedVariant.stockQuantity < 1 ? "Unavailable" : "Add to Cart"}
           </Button>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { HeartIcon, EyeIcon } from "lucide-react";
@@ -9,6 +10,7 @@ import { useWishlistStore } from "@/store/wishlist";
 import { useUIStore } from "@/store/ui";
 import { useCartStore } from "@/store/cart";
 import { resolveProductImage } from "@/lib/demo-images";
+import { premiumEase } from "@/components/shared/motion";
 import { cn } from "@/lib/utils";
 
 type Product = {
@@ -19,6 +21,7 @@ type Product = {
   reviewCount?: number;
   totalStock?: number;
   createdAt?: string;
+  isNewArrival?: boolean;
   previousPrice?: number | null;
   images: { url: string; alt?: string | null }[];
   variants?: { id: string; colorName: string; colorHex?: string | null }[];
@@ -39,19 +42,24 @@ export function ProductCard({ product }: { product: Product }) {
   const totalStock = product.totalStock ?? 0;
   const isSellingFast = totalStock > 0 && totalStock <= 12;
   const isBestSeller = (product.reviewCount ?? 0) >= 1;
-  const isNewArrival =
-    product.createdAt != null &&
-    Date.now() - new Date(product.createdAt).getTime() <= 1000 * 60 * 60 * 24 * 45;
+  const isNewArrival = product.isNewArrival ?? false;
 
   return (
-    <div className="group relative overflow-hidden rounded-3xl border bg-card p-2 shadow-sm transition-shadow hover:shadow-lg">
+    <motion.div
+      initial={{ opacity: 0, y: 22 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.15 }}
+      whileHover={{ y: -6 }}
+      transition={{ duration: 0.6, ease: premiumEase }}
+      className="group relative overflow-hidden rounded-3xl border bg-card p-2 shadow-sm premium-surface"
+    >
       <Link href={`/product/${product.id}`} className="block">
         <div className="relative aspect-[3/4] overflow-hidden rounded-[1.25rem] bg-muted">
           <Image
             src={img.startsWith("http") ? img : img}
             alt={product.name}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            className="object-cover transition-transform duration-700 group-hover:scale-[1.08] premium-media"
             sizes="(max-width: 768px) 50vw, 33vw"
             unoptimized={img.startsWith("/placeholder") || img.startsWith("/demo/")}
           />
@@ -83,7 +91,7 @@ export function ProductCard({ product }: { product: Product }) {
             <Button
               variant="secondary"
               size="icon-sm"
-              className="rounded-full bg-background/90 backdrop-blur"
+              className="pressable rounded-full bg-background/90 backdrop-blur"
               onClick={(e) => {
                 e.preventDefault();
                 openQuickView(product.id);
@@ -95,7 +103,7 @@ export function ProductCard({ product }: { product: Product }) {
             <Button
               variant="secondary"
               size="icon-sm"
-              className="rounded-full bg-background/90 backdrop-blur"
+              className="pressable rounded-full bg-background/90 backdrop-blur"
               onClick={(e) => {
                 e.preventDefault();
                 toggleWishlist(product.id);
@@ -156,7 +164,7 @@ export function ProductCard({ product }: { product: Product }) {
         <Button
           variant="default"
           size="sm"
-          className="mt-2 h-10 w-full rounded-2xl"
+          className="pressable mt-2 h-10 w-full rounded-2xl"
           onClick={(e) => {
             e.preventDefault();
             const first = product.variants?.[0];
@@ -166,6 +174,6 @@ export function ProductCard({ product }: { product: Product }) {
           Add to Cart
         </Button>
       </div>
-    </div>
+    </motion.div>
   );
 }

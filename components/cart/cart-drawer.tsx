@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { MotionItem, MotionStagger } from "@/components/shared/motion";
 import { useUIStore } from "@/store/ui";
 import { useCartStore } from "@/store/cart";
 import { Button } from "@/components/ui/button";
@@ -17,24 +18,25 @@ export function CartDrawer() {
       <SheetContent side="right" className="flex flex-col w-full max-w-md">
         <SheetTitle className="sr-only">Shopping Cart</SheetTitle>
         <div className="flex-1 overflow-auto">
-          <h2 className="text-lg font-semibold mb-4">Your Cart</h2>
+          <h2 className="mb-4 text-lg font-semibold">Your Cart</h2>
           {items.length === 0 ? (
-            <p className="text-muted-foreground text-sm">Your cart is empty.</p>
+            <MotionItem className="text-sm text-muted-foreground">Your cart is empty.</MotionItem>
           ) : (
-            <ul className="space-y-4">
+            <MotionStagger className="space-y-4" delayChildren={0.05} staggerChildren={0.06}>
               {items.map((item) => (
-                <CartItem
-                  key={`${item.productId}-${item.variantId ?? "n"}`}
-                  productId={item.productId}
-                  variantId={item.variantId}
-                  quantity={item.quantity}
-                  onRemove={() => useCartStore.getState().removeItem(item.productId, item.variantId)}
-                  onQuantityChange={(q) =>
-                    useCartStore.getState().updateQuantity(item.productId, item.variantId, q)
-                  }
-                />
+                <MotionItem key={`${item.productId}-${item.variantId ?? "n"}`}>
+                  <CartItem
+                    productId={item.productId}
+                    variantId={item.variantId}
+                    quantity={item.quantity}
+                    onRemove={() => useCartStore.getState().removeItem(item.productId, item.variantId)}
+                    onQuantityChange={(q) =>
+                      useCartStore.getState().updateQuantity(item.productId, item.variantId, q)
+                    }
+                  />
+                </MotionItem>
               ))}
-            </ul>
+            </MotionStagger>
           )}
         </div>
         {items.length > 0 && (

@@ -7,6 +7,7 @@ import { NewsletterSection } from "@/components/home/newsletter-section";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
+const NEW_ARRIVAL_WINDOW_MS = 1000 * 60 * 60 * 24 * 45;
 
 async function getCategories() {
   try {
@@ -32,6 +33,7 @@ async function getProducts() {
       price: Number(p.price),
       previousPrice: p.previousPrice ? Number(p.previousPrice) : null,
       createdAt: p.createdAt.toISOString(),
+      isNewArrival: Date.now() - p.createdAt.getTime() <= NEW_ARRIVAL_WINDOW_MS,
       reviewCount: p._count.reviews,
       totalStock: p.variants.reduce((sum, variant) => sum + variant.stockQuantity, 0),
     }));
@@ -56,6 +58,7 @@ async function getBestSellers() {
       price: Number(p.price),
       previousPrice: p.previousPrice ? Number(p.previousPrice) : null,
       createdAt: p.createdAt.toISOString(),
+      isNewArrival: Date.now() - p.createdAt.getTime() <= NEW_ARRIVAL_WINDOW_MS,
       reviewCount: p._count.reviews,
       totalStock: p.variants.reduce((sum, variant) => sum + variant.stockQuantity, 0),
     }));

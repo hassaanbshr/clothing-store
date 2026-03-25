@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { MotionItem, MotionStagger, premiumEase } from "@/components/shared/motion";
 import { resolveProductImage } from "@/lib/demo-images";
 
 type SummaryItem = {
@@ -34,7 +36,7 @@ export function OrderSummary({
   loading = false,
 }: OrderSummaryProps) {
   return (
-    <div className="rounded-[1.75rem] border bg-card p-5 shadow-sm lg:sticky lg:top-24">
+    <MotionItem className="rounded-[1.75rem] border bg-card p-5 shadow-sm premium-panel lg:sticky lg:top-24">
       <div className="flex items-start justify-between gap-3 border-b pb-4">
         <div>
           <h2 className="text-lg font-semibold">Order summary</h2>
@@ -49,11 +51,17 @@ export function OrderSummary({
         {loading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((item) => (
-              <div key={item} className="h-16 animate-pulse rounded-2xl bg-muted" />
+              <motion.div
+                key={item}
+                animate={{ opacity: [0.45, 0.85, 0.45] }}
+                transition={{ duration: 1.4, ease: "easeInOut", repeat: Infinity, delay: item * 0.08 }}
+                className="h-16 rounded-2xl bg-muted"
+              />
             ))}
           </div>
         ) : (
-          items.map((item) => {
+          <MotionStagger className="space-y-4" delayChildren={0.05} staggerChildren={0.06}>
+          {items.map((item) => {
             const image = resolveProductImage({
               src: item.image,
               slug: item.slug ?? item.productId,
@@ -61,7 +69,7 @@ export function OrderSummary({
             });
 
             return (
-              <div key={item.key} className="flex gap-3 rounded-2xl border bg-muted/20 p-3">
+              <MotionItem key={item.key} className="flex gap-3 rounded-2xl border bg-muted/20 p-3 premium-surface">
                 <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-muted">
                   <Image
                     src={image}
@@ -83,9 +91,10 @@ export function OrderSummary({
                     <span className="font-medium">${(item.price * item.quantity).toFixed(2)}</span>
                   </div>
                 </div>
-              </div>
+              </MotionItem>
             );
-          })
+          })}
+          </MotionStagger>
         )}
       </div>
 
@@ -104,9 +113,16 @@ export function OrderSummary({
         </div>
         <div className="flex items-center justify-between border-t pt-3 text-base font-semibold">
           <span>Total</span>
-          <span>${total.toFixed(2)}</span>
+          <motion.span
+            key={total}
+            initial={{ opacity: 0.55, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.28, ease: premiumEase }}
+          >
+            ${total.toFixed(2)}
+          </motion.span>
         </div>
       </div>
-    </div>
+    </MotionItem>
   );
 }

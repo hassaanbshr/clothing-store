@@ -9,18 +9,36 @@ import { resolveProductImage } from "@/lib/demo-images";
 export function RecentlyViewed() {
   const ids = useUIStore((s) => s.recentlyViewedIds);
   const [products, setProducts] = useState<{ id: string; name: string; price: number; images: { url: string }[] }[]>([]);
+  const idsKey = ids.join(",");
 
   useEffect(() => {
-    if (ids.length === 0) {
-      setProducts([]);
-      return;
-    }
-    Promise.all(
-      ids.slice(0, 6).map((id) =>
-        fetch(`/api/products/${id}`).then((r) => (r.ok ? r.json() : null))
-      )
-    ).then((results) => setProducts(results.filter(Boolean)));
-  }, [ids.join(",")]);
+    let cancelled = false;
+
+    const loadProducts = async () => {
+      if (ids.length === 0) {
+        if (!cancelled) {
+          setProducts([]);
+        }
+        return;
+      }
+
+      const results = await Promise.all(
+        ids.slice(0, 6).map((id) =>
+          fetch(`/api/products/${id}`).then((r) => (r.ok ? r.json() : null))
+        )
+      );
+
+      if (!cancelled) {
+        setProducts(results.filter(Boolean));
+      }
+    };
+
+    void loadProducts();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [ids, idsKey]);
 
   if (products.length === 0) return null;
 

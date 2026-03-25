@@ -18,7 +18,7 @@ function SheetOverlay({
   return (
     <DialogPrimitive.Overlay
       className={cn(
-        "fixed inset-0 z-50 bg-black/50 data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
+        "fixed inset-0 z-50 bg-black/36 backdrop-blur-sm duration-300 [transition-timing-function:var(--ease-premium)] data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
         className
       )}
       {...props}
@@ -45,7 +45,7 @@ function SheetContent({
       <SheetOverlay />
       <DialogPrimitive.Content
         className={cn(
-          "fixed z-50 gap-4 bg-background p-6 shadow-lg transition ease-in-out data-open:animate-in data-closed:animate-out",
+          "fixed z-50 gap-4 bg-background p-6 shadow-[var(--shadow-glow)] transition duration-400 [transition-timing-function:var(--ease-premium)] data-open:animate-in data-closed:animate-out",
           sideClasses[side],
           className
         )}
@@ -56,7 +56,7 @@ function SheetContent({
           <Button
             variant="ghost"
             size="icon-sm"
-            className="absolute right-4 top-4 rounded-full"
+            className="absolute right-4 top-4 rounded-full pressable"
             aria-label="Close panel"
           >
             <XIcon className="h-4 w-4" />

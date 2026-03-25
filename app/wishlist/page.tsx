@@ -20,21 +20,47 @@ export default function WishlistPage() {
   const productIds = useWishlistStore((s) => s.productIds);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const productIdsKey = productIds.join(",");
 
   useEffect(() => {
-    if (productIds.length === 0) {
-      setProducts([]);
-      setLoading(false);
-      return;
-    }
-    Promise.all(
-      productIds.slice(0, 20).map((id) =>
-        fetch(`/api/products/${id}`).then((r) => (r.ok ? r.json() : null))
-      )
-    )
-      .then((results) => setProducts(results.filter(Boolean)))
-      .finally(() => setLoading(false));
-  }, [productIds.length, productIds.join(",")]);
+    let cancelled = false;
+
+    const loadProducts = async () => {
+      if (productIds.length === 0) {
+        if (!cancelled) {
+          setProducts([]);
+          setLoading(false);
+        }
+        return;
+      }
+
+      if (!cancelled) {
+        setLoading(true);
+      }
+
+      try {
+        const results = await Promise.all(
+          productIds.slice(0, 20).map((id) =>
+            fetch(`/api/products/${id}`).then((r) => (r.ok ? r.json() : null))
+          )
+        );
+
+        if (!cancelled) {
+          setProducts(results.filter(Boolean));
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void loadProducts();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [productIds, productIdsKey]);
 
   return (
     <div className="container mx-auto px-4 py-8">
