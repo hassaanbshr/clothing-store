@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -38,7 +39,11 @@ export function CouponForm() {
         setValue("");
         setMinOrderAmount("");
         setMaxUses("");
+        toast.success("Coupon created.");
         router.refresh();
+      } else {
+        const payload = await res.json().catch(() => ({}));
+        toast.error(payload.error ?? "Failed to create coupon.");
       }
     } finally {
       setLoading(false);
@@ -46,7 +51,7 @@ export function CouponForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-wrap gap-4 items-end p-4 border rounded-lg">
+    <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-4 rounded-[1.5rem] border bg-card p-4 shadow-sm">
       <div>
         <label className="text-sm font-medium">Code</label>
         <Input

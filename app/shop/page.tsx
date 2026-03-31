@@ -59,7 +59,7 @@ async function getInitialProducts(searchParams: Record<string, string | undefine
       : sort === "price_desc"
         ? { price: "desc" }
         : sort === "popular"
-          ? { reviews: { _count: "desc" } }
+          ? { orderItems: { _count: "desc" } }
           : { createdAt: "desc" };
 
   const [products, total, categories, colorOptions, priceMeta] = await Promise.all([

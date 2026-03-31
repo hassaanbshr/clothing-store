@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "db:push": "prisma db push",
+    "db:push": "prisma db push --skip-generate",
     "db:seed": "prisma db seed",
     "upload:images": "tsx scripts/uploadImages.ts",
     "postinstall": "prisma generate"
@@ -29,6 +29,7 @@
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-hook-form": "^7.71.2",
+    "recharts": "^3.8.1",
     "shadcn": "^4.0.7",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.5.0",

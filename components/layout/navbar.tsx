@@ -12,15 +12,13 @@ import { ThemeToggle } from "./theme-toggle";
 import { useEffect, useState } from "react";
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
-const navLinks = [
-  { href: "/shop?category=men", label: "Men" },
-  { href: "/shop?category=women", label: "Women" },
-  { href: "/shop?q=hoodie", label: "Hoodies" },
-  { href: "/shop?q=t-shirt", label: "T-Shirts" },
-  { href: "/shop?sort=newest", label: "New Arrivals" },
-];
+type Category = { id: string; name: string; slug: string };
 
-export function Navbar() {
+type NavbarProps = {
+  categories?: Category[];
+};
+
+export function Navbar({ categories = [] }: NavbarProps) {
   const { data: session, status } = useSession();
   const totalCount = useCartStore((s) => s.getTotalItems());
   const openCart = useUIStore((s) => s.openCart);
@@ -40,13 +38,16 @@ export function Navbar() {
         </Link>
 
         <nav className="hidden lg:flex items-center gap-6">
-          {navLinks.map((link) => (
+          <Link href="/shop" className="premium-link text-sm font-medium text-muted-foreground hover:text-foreground">
+            All
+          </Link>
+          {categories.map((cat) => (
             <Link
-              key={link.href}
-              href={link.href}
+              key={cat.id}
+              href={`/shop?category=${cat.slug}`}
               className="premium-link text-sm font-medium text-muted-foreground hover:text-foreground"
             >
-              {link.label}
+              {cat.name}
             </Link>
           ))}
         </nav>
@@ -152,16 +153,16 @@ export function Navbar() {
                   >
                     Shop All
                   </Link>
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className="rounded-xl border px-4 py-3 text-sm font-medium transition-colors hover:bg-muted"
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
+                  {categories.map((cat) => (
+                    <Link
+                      key={cat.id}
+                      href={`/shop?category=${cat.slug}`}
+                      className="rounded-xl border px-4 py-3 text-sm font-medium transition-colors hover:bg-muted"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      {cat.name}
+                    </Link>
+                  ))}
                 </nav>
 
                 <div className="space-y-3 border-t pt-4 text-sm">

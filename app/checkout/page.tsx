@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { OrderSummary } from "@/components/checkout/order-summary";
 import { MotionItem, MotionReveal, MotionStagger, premiumEase } from "@/components/shared/motion";
 
-const FREE_SHIPPING_THRESHOLD = 150;
+const DEFAULT_FREE_SHIPPING_THRESHOLD = 150;
 const STANDARD_SHIPPING = 12;
 
 type SummaryItem = {
@@ -36,6 +36,7 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<"COD" | "CARD" | "ONLINE">("COD");
   const [couponCode, setCouponCode] = useState("");
   const [discount, setDiscount] = useState(0);
+  const [freeShippingThreshold, setFreeShippingThreshold] = useState(DEFAULT_FREE_SHIPPING_THRESHOLD);
   const [loading, setLoading] = useState(false);
   const [summaryItems, setSummaryItems] = useState<SummaryItem[]>([]);
   const [summaryLoading, setSummaryLoading] = useState(false);
@@ -50,8 +51,25 @@ export default function CheckoutPage() {
   });
   const placedRef = useRef(false);
   const subtotal = summaryItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const shippingFee = subtotal === 0 || subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING;
+  const shippingFee = subtotal === 0 || subtotal >= freeShippingThreshold ? 0 : STANDARD_SHIPPING;
   const total = Math.max(subtotal + shippingFee - discount, 0);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch("/api/store-settings")
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (!cancelled && data?.shippingThreshold != null) {
+          setFreeShippingThreshold(Number(data.shippingThreshold));
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -189,7 +207,7 @@ export default function CheckoutPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-          <span className="rounded-full border px-3 py-1">Free shipping over ${FREE_SHIPPING_THRESHOLD}</span>
+          <span className="rounded-full border px-3 py-1">Free shipping over ${freeShippingThreshold}</span>
           <span className="rounded-full border px-3 py-1">Cash on Delivery Available</span>
         </div>
       </MotionReveal>
@@ -352,7 +370,7 @@ export default function CheckoutPage() {
           <MotionItem className="rounded-[1.75rem] border bg-card p-5 shadow-sm premium-panel">
             <div className="space-y-3 text-sm text-muted-foreground">
               <p>COD confirmed at delivery. Shipping updates are shared after your order is placed.</p>
-              <p>{shippingFee === 0 ? "You unlocked free shipping." : `Add $${(FREE_SHIPPING_THRESHOLD - subtotal).toFixed(2)} more for free shipping.`}</p>
+              <p>{shippingFee === 0 ? "You unlocked free shipping." : `Add $${(freeShippingThreshold - subtotal).toFixed(2)} more for free shipping.`}</p>
             </div>
             <Button type="submit" size="lg" disabled={loading || summaryLoading || !session} className="premium-surface mt-5 h-12 w-full">
               {loading ? "Placing order..." : session ? "Place Order" : "Sign In to Place Order"}

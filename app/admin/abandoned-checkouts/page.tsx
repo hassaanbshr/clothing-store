@@ -1,4 +1,7 @@
 import { prisma } from "@/lib/prisma";
+import { AdminEmptyState } from "@/components/admin/admin-empty-state";
+import { AdminPageHeader } from "@/components/admin/admin-page-header";
+import { AdminTableShell } from "@/components/admin/admin-table-shell";
 
 export default async function AdminAbandonedCheckoutsPage() {
   const abandoned = await prisma.abandonedCheckout.findMany({
@@ -8,13 +11,17 @@ export default async function AdminAbandonedCheckoutsPage() {
 
   return (
     <div>
-      <h1 className="font-heading text-2xl font-semibold tracking-tight mb-8">
-        Abandoned checkouts
-      </h1>
+      <AdminPageHeader
+        title="Abandoned checkouts"
+        description="Monitor carts that were started but not converted, and prioritize recovery opportunities."
+      />
       {abandoned.length === 0 ? (
-        <p className="text-muted-foreground">No abandoned checkouts recorded.</p>
+        <AdminEmptyState
+          title="No abandoned checkouts recorded"
+          description="Once shoppers begin checkout without completing payment, those carts will appear here."
+        />
       ) : (
-        <div className="border rounded-lg overflow-hidden">
+        <AdminTableShell>
           <table className="w-full text-sm">
             <thead className="bg-muted/50">
               <tr>
@@ -35,7 +42,7 @@ export default async function AdminAbandonedCheckoutsPage() {
               ))}
             </tbody>
           </table>
-        </div>
+        </AdminTableShell>
       )}
     </div>
   );

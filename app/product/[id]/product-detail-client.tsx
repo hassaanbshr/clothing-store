@@ -16,6 +16,7 @@ import { CompleteTheLook } from "@/components/product/complete-the-look";
 import { ReviewForm } from "@/components/product/review-form";
 import { RecentlyViewed } from "@/components/shared/recently-viewed";
 import { resolveProductImage } from "@/lib/demo-images";
+import { formatCurrency, formatReviewCount } from "@/lib/storefront";
 import { cn } from "@/lib/utils";
 
 type Variant = {
@@ -131,7 +132,7 @@ export function ProductDetailClient({
     {
       label: "Customer rating",
       value: avgRating != null ? `${avgRating.toFixed(1)} / 5` : "New drop",
-      helper: avgRating != null ? `${product.reviews.length} verified reviews` : "Be the first to review it",
+      helper: avgRating != null ? formatReviewCount(product.reviews.length, "verified") : "Be the first to review it",
     },
     {
       label: "Delivery",
@@ -242,22 +243,23 @@ export function ProductDetailClient({
                 {product.name}
               </h1>
               <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
-                Elevated essentials built for modern wardrobes with everyday comfort, clean silhouettes, and easy layering.
+                {product.description ??
+                  "Minimal. Considered. Built for everyday wear with clean lines and easy layering."}
               </p>
             </div>
 
             <div className="flex items-end gap-3">
-              <span className="text-3xl font-semibold">${product.price.toFixed(2)}</span>
+              <span className="text-3xl font-semibold">{formatCurrency(product.price)}</span>
               {onSale && (
                 <span className="pb-1 text-base text-muted-foreground line-through">
-                  ${product.previousPrice!.toFixed(2)}
+                  {formatCurrency(product.previousPrice!)}
                 </span>
               )}
             </div>
 
             <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
               <span className="font-medium text-foreground">{stockMessage}</span>
-              {avgRating != null && <span>★ {avgRating.toFixed(1)} from {product.reviews.length} reviews</span>}
+              {avgRating != null && <span>★ {avgRating.toFixed(1)} from {formatReviewCount(product.reviews.length)}</span>}
               <span>{totalStock} units across variants</span>
             </div>
           </MotionItem>
@@ -377,7 +379,7 @@ export function ProductDetailClient({
               <div className="rounded-2xl border bg-muted/30 p-4 premium-surface">
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <TruckIcon className="h-4 w-4 text-primary" />
-                  Free Delivery over Rs. 2500
+                  Free delivery on orders over $50
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">Fast dispatch on all in-stock sizes and colors.</p>
               </div>
@@ -482,7 +484,7 @@ export function ProductDetailClient({
       >
         <div className="mx-auto flex max-w-2xl items-center gap-3">
           <div className="min-w-0 flex-1">
-            <p className="text-lg font-semibold">${product.price.toFixed(2)}</p>
+            <p className="text-lg font-semibold">{formatCurrency(product.price)}</p>
             <p className="truncate text-xs text-muted-foreground">
               {(selectedColor ?? firstColor) || "Default"} / {(selectedSize ?? firstSize) || "Select size"}
             </p>

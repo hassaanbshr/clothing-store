@@ -117,6 +117,9 @@ export function ShopClient({ initialData, searchParams }: Props) {
 
   const filterSidebar = (
     <FilterSidebar
+      categories={categories}
+      selectedCategory={category}
+      onSelectCategory={(slug) => setParam("category", slug)}
       selectedSizes={selectedSizes}
       selectedColors={selectedColors}
       sizeOptions={filters.sizeOptions}
@@ -182,7 +185,7 @@ export function ShopClient({ initialData, searchParams }: Props) {
                   type="search"
                   value={queryInput}
                   onChange={(e) => setQueryInput(e.target.value)}
-                  placeholder="Search streetwear, essentials, tees..."
+                  placeholder="Search coats, shirts, trousers..."
                   className="h-11 rounded-full pl-9"
                 />
               </div>

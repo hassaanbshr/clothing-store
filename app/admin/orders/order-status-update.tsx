@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { updateOrderStatusAction } from "@/actions/admin";
 import { Button } from "@/components/ui/button";
 
 const STATUSES = ["PENDING", "PAID", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"] as const;
@@ -15,20 +17,18 @@ export function OrderStatusUpdate({
 }) {
   const router = useRouter();
   const [status, setStatus] = useState(currentStatus);
-  const [loading, setLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const handleUpdate = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/orders/${orderId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
-      });
-      if (res.ok) router.refresh();
-    } finally {
-      setLoading(false);
-    }
+    startTransition(async () => {
+      const result = await updateOrderStatusAction(orderId, status);
+      if (!result.success) {
+        toast.error(result.error ?? "Failed to update order status.");
+        return;
+      }
+      toast.success("Order status updated.");
+      router.refresh();
+    });
   };
 
   return (
@@ -44,8 +44,8 @@ export function OrderStatusUpdate({
           </option>
         ))}
       </select>
-      <Button size="sm" onClick={handleUpdate} disabled={loading}>
-        Update
+      <Button size="sm" onClick={handleUpdate} disabled={isPending}>
+        {isPending ? "Saving..." : "Update"}
       </Button>
     </div>
   );

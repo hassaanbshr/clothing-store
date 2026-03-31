@@ -1,6 +1,7 @@
 import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { isAdminRole } from "@/lib/admin";
 
 export async function proxy(request: NextRequest) {
   const token = await getToken({
@@ -15,7 +16,7 @@ export async function proxy(request: NextRequest) {
       login.searchParams.set("callbackUrl", path);
       return NextResponse.redirect(login);
     }
-    if (token.role !== "ADMIN") {
+    if (!isAdminRole(typeof token.role === "string" ? token.role : undefined)) {
       return NextResponse.redirect(new URL("/", request.url));
     }
   }

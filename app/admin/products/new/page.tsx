@@ -1,13 +1,15 @@
 import { prisma } from "@/lib/prisma";
+import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { ProductForm } from "../product-form";
 
 export default async function NewProductPage() {
   const categories = await prisma.category.findMany({ orderBy: { order: "asc" } });
   return (
     <div>
-      <h1 className="font-heading text-2xl font-semibold tracking-tight mb-8">
-        Add product
-      </h1>
+      <AdminPageHeader
+        title="Add product"
+        description="Create a new catalog item with pricing, variants, media, and merchandising details."
+      />
       <ProductForm categories={categories} />
     </div>
   );

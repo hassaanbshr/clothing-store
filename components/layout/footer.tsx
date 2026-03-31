@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { NewsletterForm } from "@/components/shared/newsletter-form";
 
 const footerLinks = {
   shop: [
@@ -61,16 +60,10 @@ export function Footer() {
             </ul>
           </div>
           <div>
-            <h3 className="mb-4 text-sm font-semibold">Newsletter</h3>
-            <p className="text-sm text-muted-foreground mb-2">
-              Get launch updates, new arrivals, and your first-order offer.
+            <h3 className="mb-4 text-sm font-semibold">MARGELLE</h3>
+            <p className="text-sm text-muted-foreground">
+              Modern minimalist fashion with clean lines, refined fabrics, and everyday ease.
             </p>
-            <NewsletterForm
-              source="footer"
-              compact
-              buttonLabel="Join"
-              placeholder="Email"
-            />
           </div>
         </div>
         <div className="mt-12 border-t pt-8 text-center text-sm text-muted-foreground">

@@ -8,7 +8,16 @@ type ColorOption = {
   hex?: string | null;
 };
 
+type Category = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
 type FilterSidebarProps = {
+  categories: Category[];
+  selectedCategory: string;
+  onSelectCategory: (slug: string) => void;
   selectedSizes: string[];
   selectedColors: string[];
   sizeOptions: string[];
@@ -24,6 +33,9 @@ type FilterSidebarProps = {
 };
 
 export function FilterSidebar({
+  categories,
+  selectedCategory,
+  onSelectCategory,
   selectedSizes,
   selectedColors,
   sizeOptions,
@@ -52,6 +64,41 @@ export function FilterSidebar({
       </div>
 
       <div className="space-y-6 pt-5">
+        <section className="space-y-3">
+          <h3 className="text-sm font-semibold">Category</h3>
+          <div className="space-y-1">
+            <button
+              type="button"
+              onClick={() => onSelectCategory("")}
+              className={cn(
+                "flex w-full items-center rounded-2xl border px-3 py-2.5 text-left text-sm font-medium transition",
+                !selectedCategory
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-background hover:bg-muted"
+              )}
+            >
+              All products
+            </button>
+            {categories.map((category) => {
+              const active = selectedCategory === category.slug;
+              return (
+                <button
+                  key={category.id}
+                  type="button"
+                  onClick={() => onSelectCategory(category.slug)}
+                  className={cn(
+                    "flex w-full items-center rounded-2xl border px-3 py-2.5 text-left text-sm transition",
+                    active
+                      ? "border-primary bg-primary text-primary-foreground font-medium"
+                      : "border-border bg-background hover:bg-muted"
+                  )}
+                >
+                  {category.name}
+                </button>
+              );
+            })}
+          </div>
+        </section>
         <section className="space-y-3">
           <h3 className="text-sm font-semibold">Size</h3>
           <div className="flex flex-wrap gap-2">

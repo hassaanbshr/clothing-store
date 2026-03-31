@@ -28,10 +28,10 @@ export function HeroBanner() {
           </MotionItem>
           <MotionItem className="space-y-4">
             <h1 className="font-heading text-4xl font-semibold tracking-tight sm:text-5xl lg:text-7xl">
-              Premium Streetwear for Everyday Confidence
+              Effortless Style, Everyday.
             </h1>
             <p className="max-w-xl text-base text-white/75 sm:text-lg lg:text-xl">
-              Minimal. Comfortable. Built for modern style.
+              Minimal. Considered. Made for the modern wardrobe.
             </p>
           </MotionItem>
 
@@ -52,8 +52,8 @@ export function HeroBanner() {
           <MotionStagger className="grid max-w-xl grid-cols-3 gap-3 pt-3 text-left" delayChildren={0.2} staggerChildren={0.1}>
             {[
               { value: "24hr", label: "dispatch on new drops" },
-              { value: "4.9", label: "average customer rating" },
-              { value: "Rs 2500+", label: "free delivery threshold" },
+              { value: "Easy", label: "returns on unworn pieces" },
+              { value: "$50+", label: "free delivery threshold" },
             ].map((item) => (
               <MotionItem key={item.label}>
                 <div className="rounded-2xl border border-white/10 bg-white/5 p-4 premium-panel">
@@ -74,7 +74,7 @@ export function HeroBanner() {
                   MARGELLE
                 </span>
                 <span className="rounded-full border border-white/10 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-white/70">
-                  Streetwear
+                  Minimal Edit
                 </span>
               </div>
 
@@ -88,11 +88,11 @@ export function HeroBanner() {
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
                   <p className="text-xs uppercase tracking-[0.22em] text-white/55">Best Seller</p>
-                  <p className="mt-2 text-sm font-medium">Layer-ready silhouettes for every day.</p>
+                  <p className="mt-2 text-sm font-medium">Clean silhouettes designed for repeat wear.</p>
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
                   <p className="text-xs uppercase tracking-[0.22em] text-white/55">Comfort First</p>
-                  <p className="mt-2 text-sm font-medium">Designed to feel easy from morning to night.</p>
+                  <p className="mt-2 text-sm font-medium">Soft structure that moves easily through the day.</p>
                 </div>
               </div>
             </div>

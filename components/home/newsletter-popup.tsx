@@ -54,7 +54,7 @@ export function NewsletterPopup() {
               </MotionItem>
               <MotionItem>
                 <DialogDescription className="text-sm text-white/72">
-                  Join the MARGELLE list for new arrivals, restocks, and exclusive drops tailored to modern streetwear.
+                  Join the MARGELLE list for new arrivals, restocks, and refined essentials shaped for the modern wardrobe.
                 </DialogDescription>
               </MotionItem>
             </DialogHeader>

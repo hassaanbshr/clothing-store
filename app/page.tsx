@@ -7,6 +7,7 @@ import { NewsletterSection } from "@/components/home/newsletter-section";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
+const HOME_SECTION_LIMIT = 4;
 const NEW_ARRIVAL_WINDOW_MS = 1000 * 60 * 60 * 24 * 45;
 
 async function getCategories() {
@@ -17,7 +18,25 @@ async function getCategories() {
   }
 }
 
-async function getProducts() {
+function serializeHomeProducts<T extends {
+  price: { toString(): string };
+  previousPrice: { toString(): string } | null;
+  createdAt: Date;
+  variants: { stockQuantity: number }[];
+  _count: { reviews: number };
+}>(products: T[]) {
+  return products.map((product) => ({
+    ...product,
+    price: Number(product.price),
+    previousPrice: product.previousPrice ? Number(product.previousPrice) : null,
+    createdAt: product.createdAt.toISOString(),
+    isNewArrival: Date.now() - product.createdAt.getTime() <= NEW_ARRIVAL_WINDOW_MS,
+    reviewCount: product._count.reviews,
+    totalStock: product.variants.reduce((sum, variant) => sum + variant.stockQuantity, 0),
+  }));
+}
+
+async function getNewArrivals() {
   try {
     const products = await prisma.product.findMany({
       include: {
@@ -25,61 +44,48 @@ async function getProducts() {
         variants: true,
         _count: { select: { reviews: true } },
       },
-      orderBy: { createdAt: "desc" },
-      take: 16,
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      take: HOME_SECTION_LIMIT,
     });
-    return products.map((p) => ({
-      ...p,
-      price: Number(p.price),
-      previousPrice: p.previousPrice ? Number(p.previousPrice) : null,
-      createdAt: p.createdAt.toISOString(),
-      isNewArrival: Date.now() - p.createdAt.getTime() <= NEW_ARRIVAL_WINDOW_MS,
-      reviewCount: p._count.reviews,
-      totalStock: p.variants.reduce((sum, variant) => sum + variant.stockQuantity, 0),
-    }));
+
+    return serializeHomeProducts(products);
   } catch {
     return [];
   }
 }
 
-async function getBestSellers() {
+async function getBestSellers(excludedIds: string[]) {
   try {
     const products = await prisma.product.findMany({
+      where: excludedIds.length > 0 ? { id: { notIn: excludedIds } } : undefined,
       include: {
         images: { orderBy: { sortOrder: "asc" }, take: 3 },
         variants: true,
         _count: { select: { reviews: true } },
       },
-      orderBy: { reviews: { _count: "desc" } },
-      take: 8,
+      orderBy: [{ orderItems: { _count: "desc" } }, { createdAt: "desc" }],
+      take: HOME_SECTION_LIMIT,
     });
-    return products.map((p) => ({
-      ...p,
-      price: Number(p.price),
-      previousPrice: p.previousPrice ? Number(p.previousPrice) : null,
-      createdAt: p.createdAt.toISOString(),
-      isNewArrival: Date.now() - p.createdAt.getTime() <= NEW_ARRIVAL_WINDOW_MS,
-      reviewCount: p._count.reviews,
-      totalStock: p.variants.reduce((sum, variant) => sum + variant.stockQuantity, 0),
-    }));
+
+    return serializeHomeProducts(products);
   } catch {
     return [];
   }
 }
 
 export default async function HomePage() {
-  const [categories, products, bestSellers] = await Promise.all([
+  const [categories, newArrivals] = await Promise.all([
     getCategories(),
-    getProducts(),
-    getBestSellers(),
+    getNewArrivals(),
   ]);
+  const bestSellers = await getBestSellers(newArrivals.map((product) => product.id));
 
   return (
     <>
       <HeroBanner />
       <FeaturedCategories categories={categories} />
-      <NewArrivals products={products} />
-      <BestSellers products={bestSellers.length > 0 ? bestSellers : products} />
+      <NewArrivals products={newArrivals} />
+      <BestSellers products={bestSellers} />
       <PromoBanner />
       <NewsletterSection />
     </>

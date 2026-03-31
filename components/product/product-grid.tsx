@@ -4,6 +4,7 @@ type Product = {
   id: string;
   name: string;
   slug: string;
+  description?: string | null;
   price: number;
   previousPrice?: number | null;
   images: { url: string; alt?: string | null }[];

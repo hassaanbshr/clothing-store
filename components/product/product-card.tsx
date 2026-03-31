@@ -10,6 +10,7 @@ import { useWishlistStore } from "@/store/wishlist";
 import { useUIStore } from "@/store/ui";
 import { useCartStore } from "@/store/cart";
 import { resolveProductImage } from "@/lib/demo-images";
+import { formatCurrency, formatReviewCount } from "@/lib/storefront";
 import { premiumEase } from "@/components/shared/motion";
 import { cn } from "@/lib/utils";
 
@@ -17,6 +18,7 @@ type Product = {
   id: string;
   name: string;
   slug: string;
+  description?: string | null;
   price: number;
   reviewCount?: number;
   totalStock?: number;
@@ -43,6 +45,11 @@ export function ProductCard({ product }: { product: Product }) {
   const isSellingFast = totalStock > 0 && totalStock <= 12;
   const isBestSeller = (product.reviewCount ?? 0) >= 1;
   const isNewArrival = product.isNewArrival ?? false;
+  const supportingCopy = isSellingFast
+    ? `Only ${totalStock} left in stock`
+    : isBestSeller
+      ? formatReviewCount(product.reviewCount ?? 0)
+      : product.description ?? "A considered essential for everyday dressing.";
 
   return (
     <motion.div
@@ -121,21 +128,17 @@ export function ProductCard({ product }: { product: Product }) {
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <h3 className="truncate font-medium">{product.name}</h3>
-              {isSellingFast ? (
-                <p className="mt-1 text-xs text-amber-600">Only {totalStock} left in stock</p>
-              ) : isBestSeller ? (
-                <p className="mt-1 text-xs text-muted-foreground">{product.reviewCount} customer reviews</p>
-              ) : (
-                <p className="mt-1 text-xs text-muted-foreground">Designed for effortless daily wear</p>
-              )}
+              <p className={cn("mt-1 text-xs", isSellingFast ? "text-amber-600" : "text-muted-foreground")}>
+                {supportingCopy}
+              </p>
             </div>
             <div className="text-right">
               {onSale && (
                 <span className="block text-xs text-muted-foreground line-through">
-                  ${Number(product.previousPrice).toFixed(2)}
+                  {formatCurrency(Number(product.previousPrice))}
                 </span>
               )}
-              <span className="font-semibold">${product.price.toFixed(2)}</span>
+              <span className="font-semibold">{formatCurrency(product.price)}</span>
             </div>
           </div>
 

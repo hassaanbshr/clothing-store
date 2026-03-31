@@ -1,4 +1,6 @@
 import { prisma } from "@/lib/prisma";
+import { AdminPageHeader } from "@/components/admin/admin-page-header";
+import { AdminTableShell } from "@/components/admin/admin-table-shell";
 import { CouponForm } from "./coupon-form";
 
 export default async function AdminCouponsPage() {
@@ -8,11 +10,12 @@ export default async function AdminCouponsPage() {
 
   return (
     <div>
-      <h1 className="font-heading text-2xl font-semibold tracking-tight mb-8">
-        Coupons
-      </h1>
+      <AdminPageHeader
+        title="Coupons"
+        description="Launch discount codes, manage expiry windows, and monitor redemption limits."
+      />
       <CouponForm />
-      <div className="border rounded-lg overflow-hidden mt-8">
+      <AdminTableShell className="mt-8">
         <table className="w-full text-sm">
           <thead className="bg-muted/50">
             <tr>
@@ -39,7 +42,7 @@ export default async function AdminCouponsPage() {
             ))}
           </tbody>
         </table>
-      </div>
+      </AdminTableShell>
     </div>
   );
 }
