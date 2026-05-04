@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const productVariantSchema = z.object({
+  variantId: z.string().optional(),
   size: z.string().min(1),
   colorName: z.string().min(1),
   colorHex: z.string().optional(),

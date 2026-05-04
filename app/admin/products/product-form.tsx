@@ -60,6 +60,7 @@ export function ProductForm({
       imageUrls: product?.images?.map((image) => image.url) ?? [],
       variants:
         product?.variants?.map((variant) => ({
+          variantId: variant.id,
           size: variant.size,
           colorName: variant.colorName,
           colorHex: variant.colorHex ?? "",
