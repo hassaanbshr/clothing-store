@@ -1,7 +1,18 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireAdminApi } from "@/lib/admin";
 import { updateProductSchema } from "@/lib/validations/product";
+
+const VARIANT_ORDER_HISTORY_ERROR =
+  "Variants with order history cannot be removed. Set their stock to 0 instead.";
+
+function isKnownPrismaError(
+  error: unknown,
+  code: string
+): error is Prisma.PrismaClientKnownRequestError {
+  return error instanceof Prisma.PrismaClientKnownRequestError && error.code === code;
+}
 
 export async function GET(
   _request: Request,
@@ -51,46 +62,85 @@ export async function PUT(
       );
     }
     const { imageUrls, variants, ...data } = parsed.data;
-    await prisma.product.update({
-      where: { id },
-      data: {
-        ...data,
-        previousPrice: data.previousPrice ?? undefined,
-        sizeChartJson: data.sizeChartJson != null ? (data.sizeChartJson as object) : undefined,
-        modelSizeInfo: data.modelSizeInfo ?? undefined,
-      },
-    });
-    if (imageUrls) {
-      await prisma.productImage.deleteMany({ where: { productId: id } });
-      if (imageUrls.length > 0) {
-        await prisma.productImage.createMany({
-          data: imageUrls.map((url, i) => ({
-            productId: id,
-            url,
-            sortOrder: i,
-          })),
-        });
-      }
-    }
-    if (variants) {
-      await prisma.productVariant.deleteMany({ where: { productId: id } });
-      const product = await prisma.product.findUnique({ where: { id } });
-      if (product) {
-        for (const v of variants) {
-          await prisma.productVariant.create({
-            data: {
+    await prisma.$transaction(async (tx) => {
+      const saved = await tx.product.update({
+        where: { id },
+        data: {
+          ...data,
+          previousPrice: data.previousPrice ?? undefined,
+          sizeChartJson: data.sizeChartJson != null ? (data.sizeChartJson as object) : undefined,
+          modelSizeInfo: data.modelSizeInfo ?? undefined,
+        },
+      });
+      if (imageUrls) {
+        await tx.productImage.deleteMany({ where: { productId: id } });
+        if (imageUrls.length > 0) {
+          await tx.productImage.createMany({
+            data: imageUrls.map((url, i) => ({
               productId: id,
-              size: v.size,
-              colorName: v.colorName,
-              colorHex: v.colorHex,
-              stockQuantity: v.stockQuantity,
-              lowStockThreshold: v.lowStockThreshold ?? 5,
-              sku: `${product.slug}-${v.size}-${v.colorName.replace(/\s/g, "")}`.toUpperCase(),
-            },
+              url,
+              sortOrder: i,
+            })),
           });
         }
       }
-    }
+      if (variants) {
+        const existingVariants = await tx.productVariant.findMany({
+          where: { productId: id },
+          select: { id: true, orderItems: { select: { id: true }, take: 1 } },
+        });
+        const existingVariantIds = new Set(existingVariants.map((variant) => variant.id));
+        const submittedVariantIds = new Set(
+          variants
+            .map((variant) => variant.variantId)
+            .filter((variantId): variantId is string => Boolean(variantId))
+        );
+        const variantsToRemove = existingVariants.filter(
+          (variant) => !submittedVariantIds.has(variant.id)
+        );
+        const variantsWithOrderHistory = variantsToRemove.filter(
+          (variant) => variant.orderItems.length > 0
+        );
+
+        if (variantsWithOrderHistory.length > 0) {
+          throw new Error(VARIANT_ORDER_HISTORY_ERROR);
+        }
+
+        if (variantsToRemove.length > 0) {
+          await tx.productVariant.deleteMany({
+            where: {
+              productId: id,
+              id: { in: variantsToRemove.map((variant) => variant.id) },
+            },
+          });
+        }
+
+        for (const v of variants) {
+          const variantData = {
+            size: v.size,
+            colorName: v.colorName,
+            colorHex: v.colorHex,
+            stockQuantity: v.stockQuantity,
+            lowStockThreshold: v.lowStockThreshold ?? 5,
+            sku: v.sku?.trim() || `${saved.slug}-${v.size}-${v.colorName.replace(/\s/g, "")}`.toUpperCase(),
+          };
+
+          if (v.variantId && existingVariantIds.has(v.variantId)) {
+            await tx.productVariant.update({
+              where: { id: v.variantId },
+              data: variantData,
+            });
+          } else {
+            await tx.productVariant.create({
+              data: {
+                ...variantData,
+                productId: id,
+              },
+            });
+          }
+        }
+      }
+    });
     const updated = await prisma.product.findUnique({
       where: { id },
       include: { images: true, variants: true, category: true },
@@ -98,6 +148,12 @@ export async function PUT(
     return NextResponse.json(updated);
   } catch (e) {
     console.error("Product update error:", e);
+    if (e instanceof Error && e.message === VARIANT_ORDER_HISTORY_ERROR) {
+      return NextResponse.json({ error: e.message }, { status: 400 });
+    }
+    if (isKnownPrismaError(e, "P2003")) {
+      return NextResponse.json({ error: VARIANT_ORDER_HISTORY_ERROR }, { status: 400 });
+    }
     return NextResponse.json({ error: "Failed to update product" }, { status: 500 });
   }
 }

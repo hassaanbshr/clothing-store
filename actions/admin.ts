@@ -38,6 +38,13 @@ function buildSku(slug: string, size: string, colorName: string) {
   return `${slug}-${size}-${colorName.replace(/\s+/g, "")}`.toUpperCase();
 }
 
+function isKnownPrismaError(
+  error: unknown,
+  code: string
+): error is Prisma.PrismaClientKnownRequestError {
+  return error instanceof Prisma.PrismaClientKnownRequestError && error.code === code;
+}
+
 async function ensureAdmin() {
   const session = await requireAdminApi();
   if (!session) {
@@ -112,21 +119,68 @@ export async function saveProductAction(
             },
           });
 
-      await tx.productVariant.deleteMany({ where: { productId: saved.id } });
       await tx.productImage.deleteMany({ where: { productId: saved.id } });
 
       if (normalizedVariants.length > 0) {
-        await tx.productVariant.createMany({
-          data: normalizedVariants.map((variant) => ({
-            productId: saved.id,
+        const existingVariants = productId
+          ? await tx.productVariant.findMany({
+              where: { productId: saved.id },
+              select: { id: true, orderItems: { select: { id: true }, take: 1 } },
+            })
+          : [];
+        const existingVariantIds = new Set(existingVariants.map((variant) => variant.id));
+        const submittedVariantIds = new Set(
+          normalizedVariants
+            .map((variant) => variant.variantId)
+            .filter((variantId): variantId is string => Boolean(variantId))
+        );
+
+        const variantsToRemove = existingVariants.filter(
+          (variant) => !submittedVariantIds.has(variant.id)
+        );
+        const variantsWithOrderHistory = variantsToRemove.filter(
+          (variant) => variant.orderItems.length > 0
+        );
+
+        if (variantsWithOrderHistory.length > 0) {
+          throw new Error(
+            "Variants with order history cannot be removed. Set their stock to 0 instead."
+          );
+        }
+
+        if (variantsToRemove.length > 0) {
+          await tx.productVariant.deleteMany({
+            where: {
+              productId: saved.id,
+              id: { in: variantsToRemove.map((variant) => variant.id) },
+            },
+          });
+        }
+
+        for (const variant of normalizedVariants) {
+          const data = {
             size: variant.size,
             colorName: variant.colorName,
             colorHex: variant.colorHex || null,
             sku: variant.sku,
             stockQuantity: variant.stockQuantity,
             lowStockThreshold: variant.lowStockThreshold ?? 5,
-          })),
-        });
+          };
+
+          if (variant.variantId && existingVariantIds.has(variant.variantId)) {
+            await tx.productVariant.update({
+              where: { id: variant.variantId },
+              data,
+            });
+          } else {
+            await tx.productVariant.create({
+              data: {
+                ...data,
+                productId: saved.id,
+              },
+            });
+          }
+        }
       }
 
       if (imageUrls.length > 0) {
@@ -151,6 +205,14 @@ export async function saveProductAction(
     return { success: true, data: { id: product.id } };
   } catch (error) {
     console.error("saveProductAction error", error);
+
+    if (isKnownPrismaError(error, "P2003")) {
+      return {
+        success: false,
+        error: "Variants with order history cannot be removed. Set their stock to 0 instead.",
+      };
+    }
+
     return {
       success: false,
       error: error instanceof Error ? error.message : "Failed to save product.",
