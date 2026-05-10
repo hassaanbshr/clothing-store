@@ -6,6 +6,7 @@ import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { AdminProductsTable } from "@/components/admin/admin-products-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { parsePositiveIntParam } from "@/lib/pagination";
 
 type Props = {
   searchParams: Promise<{
@@ -19,7 +20,7 @@ export default async function AdminProductsPage({ searchParams }: Props) {
   const params = await searchParams;
   const query = params.q?.trim() ?? "";
   const selectedCategory = params.category ?? "";
-  const page = Math.max(1, Number(params.page ?? "1"));
+  const page = parsePositiveIntParam(params.page, 1);
   const pageSize = 12;
 
   const where: Prisma.ProductWhereInput = {
