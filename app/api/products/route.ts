@@ -3,6 +3,7 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireAdminApi } from "@/lib/admin";
 import { createProductSchema } from "@/lib/validations/product";
+import { parsePositiveIntParam } from "@/lib/pagination";
 
 export async function GET(request: Request) {
   try {
@@ -15,8 +16,8 @@ export async function GET(request: Request) {
     const color = searchParams.get("color");
     const q = searchParams.get("q");
     const sort = searchParams.get("sort") ?? "newest";
-    const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10));
-    const limit = Math.min(24, Math.max(1, parseInt(searchParams.get("limit") ?? "12", 10)));
+    const page = parsePositiveIntParam(searchParams.get("page"), 1);
+    const limit = parsePositiveIntParam(searchParams.get("limit"), 12, 24);
     const skip = (page - 1) * limit;
 
     const where: Prisma.ProductWhereInput = {};

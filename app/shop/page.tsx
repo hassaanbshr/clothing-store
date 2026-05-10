@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import type { Prisma } from "@prisma/client";
 import { ShopClient } from "./shop-client";
 import { prisma } from "@/lib/prisma";
+import { parsePositiveIntParam } from "@/lib/pagination";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +23,7 @@ async function getInitialProducts(searchParams: Record<string, string | undefine
   const selectedSizes = parseMultiValue(searchParams.size);
   const selectedColors = parseMultiValue(searchParams.color);
   const maxPrice = Number(searchParams.maxPrice ?? "");
-  const page = Math.max(1, parseInt(searchParams.page ?? "1", 10));
+  const page = parsePositiveIntParam(searchParams.page, 1);
   const limit = 12;
   const skip = (page - 1) * limit;
 
